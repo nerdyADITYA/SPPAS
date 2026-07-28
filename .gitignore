@@ -1,0 +1,63 @@
+# Node.js dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables & secrets (CRITICAL PROTECTED FILES)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.env
+backend/.env
+frontend/.env
+
+# Build and distribution directories
+dist/
+build/
+out/
+frontend/dist/
+frontend/build/
+
+# Application Logs & Debug outputs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Prisma generated artifacts (optional cache, keep schema)
+backend/prisma/migrations/dev.db
+backend/prisma/*.db-journal
+
+# IDEs & Code Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files & caches
+.cache/
+.eslintcache
+.stylelintcache
+temp/
+tmp/
+.temp/
+
+# Coverage reports
+coverage/
+.nyc_output/

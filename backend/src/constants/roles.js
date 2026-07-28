@@ -1,0 +1,9 @@
+const ROLES = {
+  SUPERADMIN: 'SUPERADMIN',
+  ADMIN: 'ADMIN',
+  SUPERVISOR: 'SUPERVISOR',
+  CONTROLROOM: 'CONTROLROOM',
+  USER: 'USER',
+};
+
+module.exports = { ROLES };

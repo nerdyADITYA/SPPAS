@@ -1,0 +1,632 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Core Master Models
+// ----------------------------------------------------------------------------
+
+model company {
+  CompanyCode             Int       @id @default(autoincrement()) @db.UnsignedSmallInt
+  PrincipalCompany        String?   @db.VarChar(100)
+  PrincipalCompanyCode    String?   @db.VarChar(255)
+  VendorCode              String?   @db.VarChar(20)
+  CompanyName             String?   @default("") @db.VarChar(100)
+  CompanyAddress          String?   @db.VarChar(255)
+  EstablishmentCode       String?   @db.VarChar(100)
+  SalesTaxNo              String?   @db.VarChar(100)
+  ExciseNo                String?   @db.VarChar(100)
+  PanNo                   String?   @db.VarChar(100)
+  SiteLocationPlant       String?   @db.VarChar(100)
+  Phone                   String?   @db.VarChar(30)
+  Fax                     String?   @db.VarChar(100)
+  Email                   String?   @default("") @db.VarChar(100)
+  webpage                 String?   @default("") @db.VarChar(100)
+  Prefix_EmpNo            String?   @db.VarChar(10)
+  JobNature               String?   @default("") @db.VarChar(100)
+  ResponsiblePersonName   String?   @default("") @db.VarChar(100)
+  ResponsibleRelation     String?   @default("") @db.VarChar(100)
+  ResponsibleAddress      String?   @default("") @db.VarChar(255)
+  ResponsiblePhone        String?   @default("") @db.VarChar(50)
+  ResponsibleEmail        String?   @default("") @db.VarChar(100)
+  OwnerName               String?   @default("") @db.VarChar(100)
+  OwnerAddress            String?   @default("") @db.VarChar(255)
+  OwnerPhone              String?   @default("") @db.VarChar(50)
+  OwnerEmail              String?   @default("") @db.VarChar(100)
+  LicenseFrom             DateTime? @db.Date
+  LicenseTo               DateTime? @db.Date
+  LicenseNo               String?   @db.VarChar(50)
+  WorkerCover             Int?      @db.UnsignedSmallInt
+  LWF                     String?   @default("") @db.VarChar(100)
+  WCPolicyFrom            DateTime? @db.Date
+  WCPolicyTo              DateTime? @db.Date
+  wcPolicyNo              String?   @db.VarChar(100)
+  WCWorkerCover           Int?      @db.UnsignedSmallInt
+  EnablePortal            EnableFlag? @default(N)
+  CompanyValidate         YesNoFlag?  @default(N)
+  CompanyValidateBy       String?   @db.VarChar(100)
+  CompanyValidateDateTime DateTime? @db.DateTime
+  CompanyEnable           String?   @db.VarChar(1)
+  CompanyType             String?   @db.VarChar(15)
+  CreatedDateTime         DateTime  @default(now()) @db.Timestamp(0)
+  UpdateDateTime          DateTime? @db.DateTime
+  PCResponsiblePersonName String?   @default("") @db.VarChar(100)
+  PCResponsibleAddress    String?   @default("") @db.VarChar(100)
+  PCResponsiblePhone      String?   @default("") @db.VarChar(100)
+  PCResponsibleEmail      String?   @default("") @db.VarChar(100)
+  shopEstno               String?   @default("") @db.VarChar(100)
+  MSMEno                  String?   @default("") @db.VarChar(100)
+  ValidFrom               DateTime? @db.Date
+  ValidTo                 DateTime? @db.Date
+  PTaxNo                  String?   @default("") @db.VarChar(100)
+}
+
+model categorymaster {
+  CategoryCode           Int       @id @default(autoincrement()) @db.UnsignedTinyInt
+  CategoryName           String?   @db.VarChar(100)
+  Statutory              String?   @db.VarChar(25)
+  GroupCategory          String?   @db.VarChar(20)
+  WeeklyOffApplicable    String?   @db.Char(1)
+  PaidHolidayApplicable  String?   @db.Char(1)
+  OverTimeApplicable     String?   @db.Char(1)
+  OverTimeQuarterlyLimit Decimal?  @default(0.00) @db.Decimal(5, 2)
+  OverTimeMonthlyLimit   Decimal?  @default(0.00) @db.Decimal(5, 2)
+  OverTimeWeeklyLimit    Decimal?  @default(0.00) @db.Decimal(5, 2)
+  DailyWagesApplicable   String?   @db.Char(1)
+  SalaryMonthDay         Int?      @db.UnsignedTinyInt
+  LeaveCoverAllow        EnableFlag? @default(N)
+  LeaveCoverAbsentee     EnableFlag? @default(N)
+  Enable                 String?   @default("N") @db.Char(1)
+  CreatedDateTime        DateTime  @default(now()) @db.Timestamp(0)
+  UpdateDateTime         DateTime? @db.DateTime
+  ResponsiblePersonName  String?   @db.Text
+  ResponsibleAddress     String?   @db.Text
+  ResponsiblePhone       String?   @db.Text
+  ResponsibleEmail       String?   @db.Text
+}
+
+model departmentmaster {
+  DepartmentCode        Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  DepartmentName        String?    @db.VarChar(100)
+  ShortDeptName         String?    @db.VarChar(10)
+  Statutory             String?    @db.VarChar(25)
+  Department_Type       String?    @db.VarChar(25)
+  Enable                EnableFlag? @default(Y)
+  CreatedDateTime       DateTime   @default(now()) @db.Timestamp(0)
+  UpdateDateTime        DateTime?  @db.Timestamp(0)
+  ResponsiblePersonName String?    @default("") @db.VarChar(100)
+  ResponsibleAddress    String?    @default("") @db.VarChar(255)
+  ResponsiblePhone      String?    @default("") @db.VarChar(50)
+  ResponsibleEmail      String?    @default("") @db.VarChar(100)
+
+  employees             employeemaster[]
+}
+
+model designationmaster {
+  DesignationCode Int       @id @default(autoincrement()) @db.UnsignedSmallInt
+  Designation     String?   @db.VarChar(100)
+  Enable          EnableFlag? @default(Y)
+  CreatedDateTime DateTime  @default(now()) @db.Timestamp(0)
+  UpdateDateTime  DateTime? @db.DateTime
+
+  employees       employeemaster[]
+}
+
+model locationmaster {
+  LocationCode          Int       @id @default(autoincrement()) @db.UnsignedSmallInt
+  Location              String?   @db.VarChar(100)
+  ShortLocName          String?   @db.VarChar(10)
+  Enable                EnableFlag? @default(Y)
+  CreatedDateTime       DateTime  @default(now()) @db.Timestamp(0)
+  UpdateDateTime        DateTime? @db.Timestamp(0)
+  ResponsiblePersonName String?   @default("") @db.VarChar(100)
+  ResponsibleAddress    String?   @default("") @db.VarChar(255)
+  ResponsiblePhone      String?   @default("") @db.VarChar(50)
+  ResponsibleEmail      String?   @default("") @db.VarChar(100)
+
+  employees             employeemaster[]
+  posts                 securitypostmaster[]
+  devices               securitydevicemaster[]
+}
+
+model shiftmaster {
+  ShiftCode                Int       @id @default(autoincrement()) @db.UnsignedTinyInt
+  Shift                    String?   @db.VarChar(25)
+  Statutory                String?   @db.VarChar(25)
+  FullDayHrs               DateTime? @db.Time(0)
+  HalfDayHrs               DateTime? @db.Time(0)
+  LunchHrs                 DateTime? @db.Time(0)
+  ShiftStartTime           DateTime? @db.Time(0)
+  ShiftEndTime             DateTime? @db.Time(0)
+  GraceAfterShiftStart     DateTime? @db.Time(0)
+  GraceBeforeShiftEnd      DateTime? @db.Time(0)
+  GraceForWorkedStatus     DateTime? @default(dbgenerated("'00:00:00'")) @db.Time(0)
+  GraceForMeal             DateTime? @db.Time(0)
+  OTBeforeShiftStart       DateTime? @db.Time(0)
+  OTAfterShiftEnd          DateTime? @db.Time(0)
+  OtMinHours               DateTime  @default(dbgenerated("'00:00:00'")) @db.Time(0)
+  OTRound                  Int       @default(0) @db.UnsignedTinyInt
+  Rotation                 String    @default("N") @db.Char(1)
+  ShiftAlocation_StartTime DateTime? @db.Time(0)
+  ShiftAlocation_EndTime   DateTime? @db.Time(0)
+  ShiftAlocation_PunchBreak DateTime? @db.Time(0)
+  Enable                   String?   @default("Y") @db.Char(1)
+  CreatedDateTime          DateTime  @default(now()) @db.Timestamp(0)
+  UpdateDateTime           DateTime? @db.DateTime
+  Consider_MinMax          EnableFlag @default(Y)
+  ShiftStartTime_OTStart   EnableFlag @default(N)
+  ShiftStartTime_WorkStart EnableFlag @default(N)
+  Ignore_Holiday           EnableFlag @default(N)
+  Ignore_WeekOff           EnableFlag @default(N)
+
+  attendance               securityattendance[]
+  deployments              securitydeployment[]
+  deploymentHistories      securitydeploymenthistory[]
+  postVacancies            securitypostvacancy[]
+}
+
+model employeemaster {
+  EmpNo                String      @id @db.VarChar(20)
+  PunchCardNo          Int?
+  FirstName            String?     @db.VarChar(50)
+  MiddleName           String?     @default("") @db.VarChar(50)
+  LastName             String?     @default("") @db.VarChar(50)
+  PrincipalCompanyCode Int?
+  DepartmentCode       Int?        @db.UnsignedSmallInt
+  SubDepartmentCode    Int?        @db.SmallInt
+  SectionCode          Int?        @db.SmallInt
+  DesignationCode      Int?        @db.UnsignedSmallInt
+  CategoryCode         Int?        @db.SmallInt
+  CompanyCode          Int?        @db.SmallInt
+  LocationCode         Int?        @db.UnsignedSmallInt
+  McCode               Int?        @db.SmallInt
+  ScCode               Int?        @db.SmallInt
+  UnitCode             Int?
+  SubUnitCode          Int?
+  JobNature            String?     @db.VarChar(100)
+  Status               String?     @db.VarChar(20)
+  Confirm              String?     @db.VarChar(1)
+  Gender               String?     @db.VarChar(1)
+  BloodGroup           String?     @db.VarChar(10)
+  PfNo                 String?     @db.VarChar(30)
+  EsiNo                String?     @db.VarChar(20)
+  PanCardNo            String?     @db.VarChar(20)
+  BankAcNo             String?     @db.VarChar(30)
+  PaymentMode          String?     @db.VarChar(6)
+  BankCode             Int?        @db.UnsignedTinyInt
+  EmployeeGrade        String?     @db.VarChar(5)
+  EmpLevel             String?     @db.VarChar(50)
+  PositionTitle        String?     @db.VarChar(200)
+  Accomodation         String?     @db.VarChar(1)
+  EmpType              String?     @db.VarChar(25)
+  Production           String?     @db.VarChar(1)
+  LocalEmp             String?     @db.VarChar(1)
+  EmpGroup             String?     @db.VarChar(50)
+  ESI_Applicable       String?     @db.VarChar(3)
+  ESI_Deduct           String?     @db.VarChar(3)
+  RecoveryEmp          Decimal?    @db.Decimal(10, 2)
+  LicID                String?     @db.VarChar(20)
+  Password             Bytes?      @db.TinyBlob
+  SecurityRole         SecurityRole @default(USER)
+  Email_OTP_Enabled    EnableFlag?  @default(N)
+  Email_OTP            String?     @db.VarChar(10)
+  Email_OTP_DateTime   DateTime?   @db.DateTime
+  SapEmpNo             String?     @db.VarChar(10)
+  PFTrust              String?     @db.Char(1)
+  ClaimMoreThenMonth   String?     @db.Char(1)
+  ReasonLeaving        String?     @db.VarChar(50)
+  LeaveBalStartMonth   String?     @db.VarChar(10)
+  Metro                EnableFlag?  @default(N)
+  HOD                  EnableFlag?  @default(N)
+  HOD_Type             String?     @default("") @db.VarChar(25)
+  HOD_Level            Int?        @default(0) @db.UnsignedTinyInt
+  LWF                  String?     @db.VarChar(50)
+  AadharID             String?     @db.VarChar(15)
+  UAN                  String?     @db.VarChar(15)
+  IFSC_Code            String?     @db.VarChar(20)
+  Leve_Reg_GEN         EnableFlag?  @default(Y)
+  VoterID              String?     @db.VarChar(15)
+  DrivingLicense       String?     @db.VarChar(20)
+  ReqNo                String?     @db.VarChar(20)
+  ReqDateTime          DateTime    @default(now()) @db.Timestamp(0)
+  Religion             String?     @db.VarChar(50)
+  Cast_Category        String?     @db.VarChar(15)
+  Education            String?     @db.VarChar(100)
+  Previous_Experience  Decimal?    @db.Decimal(5, 2)
+  TypeOfEmployment     String?     @db.VarChar(50)
+  AnyRelativeIn_SAC    EnableFlag?  @default(N)
+  SAC_EmpInfo          String?     @db.VarChar(255)
+  Web_UserType         Int?        @default(-1) @db.SmallInt
+  Domicile             String?     @db.VarChar(255)
+  Enable               String?     @default("Y") @db.Char(1)
+  SinglePunchAllow     EnableFlag?  @default(N)
+  Permanent_Present    EnableFlag?  @default(N)
+  ExcludeAutoGenMail   EnableFlag?  @default(N)
+  WorkOrder            String?     @db.VarChar(50)
+  CreatedDateTime      DateTime    @default(now()) @db.Timestamp(0)
+  UpdateDateTime       DateTime?   @db.DateTime
+  NPS_Applicable       String?     @default("N") @db.Char(1)
+  LastPswChange        DateTime?   @db.DateTime
+
+  department           departmentmaster? @relation(fields: [DepartmentCode], references: [DepartmentCode])
+  designation          designationmaster? @relation(fields: [DesignationCode], references: [DesignationCode])
+  location             locationmaster?    @relation(fields: [LocationCode], references: [LocationCode])
+
+  dates                employeedates?
+  personal             employeepersonal?
+  attendance           securityattendance[]
+  deployments          securitydeployment[] @relation("GuardDeployments")
+  allocatedDeployments securitydeployment[] @relation("AllocatedByDeployments")
+  approvedDeployments  securitydeployment[] @relation("ApprovedByDeployments")
+  historyRecords       securitydeploymenthistory[] @relation("GuardHistory")
+  changedHistories     securitydeploymenthistory[] @relation("ChangedByHistory")
+  alerts               securityalertlog[] @relation("GuardAlerts")
+  resolvedAlerts       securityalertlog[] @relation("ResolvedByAlerts")
+}
+
+model employeedates {
+  EmpNo                  String    @id @db.VarChar(20)
+  Doj                    DateTime? @db.Date
+  DoBirth                DateTime? @db.Date
+  DateOfConfirm          DateTime? @db.Date
+  DateOfRetire           DateTime? @db.Date
+  DateOfRelieve          DateTime? @db.Date
+  TrainingFrom           DateTime? @db.Date
+  TrainingUpto           DateTime? @db.Date
+  ProbationFrom          DateTime? @db.Date
+  ProbationUpto          DateTime? @db.Date
+  WeeklyOffOne           String?   @default("Sunday") @db.VarChar(9)
+  WeeklyOffTwo           String?   @db.VarChar(9)
+  WeeklyOffTwoHalfOrFull String?   @db.VarChar(1)
+  WeeklyOffTwoFullDayHrs Decimal?  @db.Decimal(10, 0)
+  WeeklyOffTwoHalfDayHrs Decimal?  @db.Decimal(10, 0)
+  ShiftPatternID         Int?      @default(1) @db.SmallInt
+  WeeklyOffTwo1          Int?      @default(0) @db.UnsignedTinyInt
+  WeeklyOffTwo2          Int?      @default(0) @db.UnsignedTinyInt
+  WeeklyOffTwo3          Int?      @default(0) @db.UnsignedTinyInt
+  WeeklyOffTwo4          Int?      @default(0) @db.UnsignedTinyInt
+  WeeklyOffTwo5          Int?      @default(0) @db.UnsignedTinyInt
+  WeeklyOffTwo6          Int?      @default(0) @db.UnsignedTinyInt
+  PoliceVerificationDate DateTime? @db.Date
+  PeriodicMedicalDate    DateTime? @db.Date
+  SafetyTrainingDate     DateTime? @db.Date
+  WeeklyOffTwoMonthFixed EnableFlag? @default(Y)
+  UpdateDateTime         DateTime? @db.DateTime
+
+  employee               employeemaster @relation(fields: [EmpNo], references: [EmpNo], onDelete: Cascade)
+}
+
+model employeepersonal {
+  EmpNo                String    @id @db.VarChar(20)
+  PermanentAddress     String?   @db.VarChar(255)
+  PVillage             String?   @db.VarChar(50)
+  PDistrict            String?   @db.VarChar(50)
+  PCity                String?   @db.VarChar(50)
+  PState               String?   @db.VarChar(50)
+  PPinCode             String?   @db.VarChar(10)
+  CurrentAddress       String?   @db.VarChar(255)
+  CVillage             String?   @db.VarChar(50)
+  CDistrict            String?   @db.VarChar(50)
+  CCity                String?   @db.VarChar(50)
+  CState               String?   @db.VarChar(50)
+  CPinCode             String?   @db.VarChar(10)
+  PhoneNo              String?   @db.VarChar(20)
+  Mobile               String?   @db.VarChar(15)
+  Email                String?   @db.VarChar(150)
+  Remarks              String?   @db.VarChar(100)
+  MaritalStatus        String?   @db.VarChar(15)
+  SpouseName           String?   @db.VarChar(50)
+  NoOfKids             Int?
+  MedicalHistory       String?   @db.VarChar(1000)
+  AllergicTo           String?   @db.VarChar(255)
+  LastMedicalCheckUp   DateTime? @db.Date
+  EmergencyContact     String?   @db.VarChar(255)
+  MedicalPolicy        String?   @db.VarChar(100)
+  AccidentPolicy       String?   @db.VarChar(100)
+  MarkOfIdentification String?   @db.VarChar(100)
+  VaccineDate1         DateTime? @db.Date
+  VaccineDate2         DateTime? @db.Date
+  Unit                 String?   @default("") @db.VarChar(70)
+  SubUnit              String?   @default("") @db.VarChar(70)
+  LanguageKnown        String?   @default("") @db.VarChar(50)
+
+  employee             employeemaster @relation(fields: [EmpNo], references: [EmpNo], onDelete: Cascade)
+}
+
+// ----------------------------------------------------------------------------
+// Security Master Models
+// ----------------------------------------------------------------------------
+
+model securitypostcategorymaster {
+  PostCategoryCode Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  PostCategoryName String     @unique @db.VarChar(100)
+  Description      String?    @db.VarChar(255)
+  Enable           EnableFlag? @default(Y)
+  CreatedDateTime  DateTime   @default(now()) @db.Timestamp(0)
+  UpdateDateTime   DateTime?  @db.DateTime
+
+  posts            securitypostmaster[]
+}
+
+model securitypostmaster {
+  PostCode         Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  PostName         String     @unique @db.VarChar(100)
+  PostShortName    String?    @db.VarChar(20)
+  PostCategoryCode Int        @db.UnsignedSmallInt
+  LocationCode     Int?       @db.UnsignedSmallInt
+  Priority         Int        @default(1) @db.UnsignedSmallInt
+  MinimumGuards    Int        @default(1) @db.UnsignedTinyInt
+  MaximumGuards    Int        @default(1) @db.UnsignedTinyInt
+  FemaleOnly       EnableFlag? @default(N)
+  CriticalPost     EnableFlag? @default(N)
+  RestrictedPost   EnableFlag? @default(N)
+  Remarks          String?    @db.VarChar(255)
+  Enable           EnableFlag? @default(Y)
+  CreatedDateTime  DateTime   @default(now()) @db.Timestamp(0)
+  UpdateDateTime   DateTime?  @db.DateTime
+
+  postCategory     securitypostcategorymaster @relation(fields: [PostCategoryCode], references: [PostCategoryCode])
+  location         locationmaster?            @relation(fields: [LocationCode], references: [LocationCode])
+
+  deployments      securitydeployment[]
+  historyRecords   securitydeploymenthistory[]
+  alerts           securityalertlog[]
+  vacancies        securitypostvacancy[]
+}
+
+model securityallocationrulemaster {
+  RuleCode                      Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  RuleName                      String     @unique @db.VarChar(100)
+  RuleDescription               String?    @db.VarChar(255)
+  RulePriority                  Int        @default(1) @db.UnsignedSmallInt
+  CriticalPostFirst             EnableFlag? @default(Y)
+  PriorityBasedAllocation       EnableFlag? @default(Y)
+  ReportingTimeBasedAllocation EnableFlag? @default(Y)
+  SkillBasedAllocation          EnableFlag? @default(Y)
+  GenderBasedAllocation         EnableFlag? @default(Y)
+  RestrictedDutyCheck           EnableFlag? @default(Y)
+  RotationApplicable            EnableFlag? @default(Y)
+  Enable                        EnableFlag? @default(Y)
+  CreatedDateTime               DateTime   @default(now()) @db.Timestamp(0)
+  UpdateDateTime                DateTime?  @db.DateTime
+}
+
+model securityguardrestrictionmaster {
+  RestrictionCode Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  RestrictionName String     @unique @db.VarChar(100)
+  Description     String?    @db.VarChar(255)
+  Enable          EnableFlag? @default(Y)
+  CreatedDateTime DateTime   @default(now()) @db.Timestamp(0)
+  UpdateDateTime  DateTime?  @db.DateTime
+}
+
+model securitydevicemaster {
+  DeviceCode        Int            @id @default(autoincrement()) @db.UnsignedSmallInt
+  DeviceName        String         @db.VarChar(100)
+  DeviceSerialNo    String?        @unique @db.VarChar(100)
+  DeviceModel       String?        @db.VarChar(100)
+  IPAddress         String         @unique @db.VarChar(45)
+  PortNo            Int            @default(4370) @db.UnsignedSmallInt
+  CommunicationType CommunicationType? @default(TCPIP)
+  LocationCode      Int?           @db.UnsignedSmallInt
+  DeviceStatus      DeviceStatus?  @default(OFFLINE)
+  LastHeartbeat     DateTime?      @db.DateTime
+  LastSyncDateTime  DateTime?      @db.DateTime
+  Remarks           String?        @db.VarChar(255)
+  Enable            EnableFlag?    @default(Y)
+  CreatedDateTime   DateTime       @default(now()) @db.Timestamp(0)
+  UpdateDateTime    DateTime?      @db.DateTime
+
+  location          locationmaster? @relation(fields: [LocationCode], references: [LocationCode])
+  attendance        securityattendance[]
+  alerts            securityalertlog[]
+}
+
+// ----------------------------------------------------------------------------
+// Transaction Models
+// ----------------------------------------------------------------------------
+
+model securityattendance {
+  AttendanceCode   BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  EmpNo            String            @db.VarChar(20)
+  PunchCardNo      Int?
+  DeviceCode       Int               @db.UnsignedSmallInt
+  PunchDate        DateTime          @db.Date
+  PunchTime        DateTime          @db.Time(0)
+  PunchDateTime    DateTime          @db.DateTime
+  ShiftCode        Int?              @db.UnsignedTinyInt
+  PunchType        PunchType?        @default(IN)
+  AttendanceStatus AttendanceStatus? @default(PENDING)
+  Remarks          String?           @db.VarChar(255)
+  CreatedDateTime  DateTime          @default(now()) @db.Timestamp(0)
+  UpdateDateTime   DateTime?         @db.DateTime
+
+  employee         employeemaster       @relation(fields: [EmpNo], references: [EmpNo])
+  device           securitydevicemaster @relation(fields: [DeviceCode], references: [DeviceCode])
+  shift            shiftmaster?         @relation(fields: [ShiftCode], references: [ShiftCode])
+}
+
+model securitydeployment {
+  DeploymentCode   BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  DeploymentDate   DateTime         @db.Date
+  EmpNo            String           @db.VarChar(20)
+  PostCode         Int              @db.UnsignedSmallInt
+  ShiftCode        Int              @db.UnsignedTinyInt
+  ReportingTime    DateTime?        @db.DateTime
+  RelievingTime    DateTime?        @db.DateTime
+  AllocationMethod AllocationMethod? @default(AUTO)
+  DeploymentStatus DeploymentStatus? @default(ALLOCATED)
+  AllocatedBy      String?          @db.VarChar(20)
+  ApprovedBy       String?          @db.VarChar(20)
+  Remarks          String?          @db.VarChar(255)
+  CreatedDateTime  DateTime         @default(now()) @db.Timestamp(0)
+  UpdateDateTime   DateTime?        @db.DateTime
+
+  employee         employeemaster     @relation("GuardDeployments", fields: [EmpNo], references: [EmpNo])
+  post             securitypostmaster @relation(fields: [PostCode], references: [PostCode])
+  shift            shiftmaster        @relation(fields: [ShiftCode], references: [ShiftCode])
+  allocatedUser    employeemaster?    @relation("AllocatedByDeployments", fields: [AllocatedBy], references: [EmpNo])
+  approvedUser     employeemaster?    @relation("ApprovedByDeployments", fields: [ApprovedBy], references: [EmpNo])
+
+  historyRecords   securitydeploymenthistory[]
+  alerts           securityalertlog[]
+
+  @@unique([DeploymentDate, EmpNo, ShiftCode], name: "uk_Deployment", map: "uk_Deployment")
+}
+
+model securitydeploymenthistory {
+  HistoryCode      BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  DeploymentCode   BigInt           @db.UnsignedBigInt
+  EmpNo            String           @db.VarChar(20)
+  PostCode         Int              @db.UnsignedSmallInt
+  ShiftCode        Int              @db.UnsignedTinyInt
+  DeploymentStatus DeploymentStatus
+  ActionType       ActionType
+  ChangedBy        String           @db.VarChar(20)
+  Remarks          String?          @db.VarChar(255)
+  CreatedDateTime  DateTime         @default(now()) @db.Timestamp(0)
+
+  deployment       securitydeployment @relation(fields: [DeploymentCode], references: [DeploymentCode], onDelete: Cascade)
+  employee         employeemaster     @relation("GuardHistory", fields: [EmpNo], references: [EmpNo])
+  post             securitypostmaster @relation(fields: [PostCode], references: [PostCode])
+  shift            shiftmaster        @relation(fields: [ShiftCode], references: [ShiftCode])
+  changedUser      employeemaster     @relation("ChangedByHistory", fields: [ChangedBy], references: [EmpNo])
+}
+
+model securityalertlog {
+  AlertCode        BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  AlertDateTime    DateTime      @default(now()) @db.DateTime
+  AlertType        AlertType
+  Severity         Severity?     @default(MEDIUM)
+  DeploymentCode   BigInt?       @db.UnsignedBigInt
+  EmpNo            String?       @db.VarChar(20)
+  PostCode         Int?          @db.UnsignedSmallInt
+  DeviceCode       Int?          @db.UnsignedSmallInt
+  AlertMessage     String        @db.VarChar(500)
+  Resolved         EnableFlag?   @default(N)
+  ResolvedBy       String?       @db.VarChar(20)
+  ResolvedDateTime DateTime?     @db.DateTime
+  Remarks          String?       @db.VarChar(255)
+  CreatedDateTime  DateTime      @default(now()) @db.Timestamp(0)
+
+  deployment       securitydeployment?  @relation(fields: [DeploymentCode], references: [DeploymentCode])
+  employee         employeemaster?      @relation("GuardAlerts", fields: [EmpNo], references: [EmpNo])
+  post             securitypostmaster?  @relation(fields: [PostCode], references: [PostCode])
+  device           securitydevicemaster? @relation(fields: [DeviceCode], references: [DeviceCode])
+  resolvedUser     employeemaster?      @relation("ResolvedByAlerts", fields: [ResolvedBy], references: [EmpNo])
+}
+
+model securitypostvacancy {
+  VacancyCode     BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  VacancyDate     DateTime      @db.Date
+  PostCode        Int           @db.UnsignedSmallInt
+  ShiftCode       Int           @db.UnsignedTinyInt
+  RequiredGuards  Int           @default(0) @db.UnsignedSmallInt
+  AllocatedGuards Int           @default(0) @db.UnsignedSmallInt
+  PresentGuards   Int           @default(0) @db.UnsignedSmallInt
+  VacantGuards    Int           @default(0) @db.UnsignedSmallInt
+  Status          VacancyStatus? @default(VACANT)
+  LastUpdated     DateTime      @default(now()) @updatedAt @db.DateTime
+  CreatedDateTime DateTime      @default(now()) @db.Timestamp(0)
+
+  post            securitypostmaster @relation(fields: [PostCode], references: [PostCode])
+  shift           shiftmaster        @relation(fields: [ShiftCode], references: [ShiftCode])
+
+  @@unique([VacancyDate, PostCode, ShiftCode], name: "uk_PostShiftDate", map: "uk_PostShiftDate")
+}
+
+// ----------------------------------------------------------------------------
+// Enums
+// ----------------------------------------------------------------------------
+
+enum EnableFlag {
+  Y
+  N
+}
+
+enum YesNoFlag {
+  Y
+  N
+}
+
+enum SecurityRole {
+  SUPERADMIN
+  ADMIN
+  SUPERVISOR
+  CONTROLROOM
+  USER
+}
+
+enum CommunicationType {
+  TCPIP @map("TCP/IP")
+  USB
+  RS232
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum PunchType {
+  IN
+  OUT
+}
+
+enum AttendanceStatus {
+  PENDING
+  ALLOCATED
+  REJECTED
+  DUPLICATE
+}
+
+enum AllocationMethod {
+  AUTO
+  MANUAL
+  OVERRIDE
+}
+
+enum DeploymentStatus {
+  ALLOCATED
+  REPORTED
+  COMPLETED
+  ABSENT
+  CANCELLED
+}
+
+enum ActionType {
+  CREATED
+  UPDATED
+  OVERRIDDEN
+  STATUS_CHANGED
+  DELETED
+}
+
+enum AlertType {
+  VACANT_POST
+  ABSENT_GUARD
+  LATE_REPORTING
+  DEVICE_OFFLINE
+  AUTO_ALLOCATION_FAILED
+  OVERTIME
+  UNAUTHORIZED_PUNCH
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum VacancyStatus {
+  VACANT
+  PARTIALLY_ALLOCATED
+  FULLY_ALLOCATED
+}
