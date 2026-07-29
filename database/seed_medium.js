@@ -159,19 +159,18 @@ async function seedMediumDataset() {
   const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'];
 
   const employeesList = [
-    // Admins & Supervisors
     { empNo: '1001', first: 'System', last: 'SuperAdmin', role: 'SUPERADMIN', gender: 'M', desig: 1, dept: 1, punch: 1001 },
     { empNo: '1002', first: 'Security', last: 'Manager', role: 'ADMIN', gender: 'M', desig: 1, dept: 1, punch: 1002 },
     { empNo: '1003', first: 'Duty', last: 'Supervisor', role: 'SUPERVISOR', gender: 'M', desig: 2, dept: 1, punch: 1003 },
     { empNo: '1004', first: 'ControlRoom', last: 'Operator', role: 'CONTROLROOM', gender: 'M', desig: 2, dept: 1, punch: 1004 },
-    { empNo: '1009', first: 'Robert', last: 'Vance', role: 'ADMIN', gender: 'M', desig: 1, dept: 1, punch: 1009 },
-    { empNo: '1010', first: 'Marcus', last: 'Aurelius', role: 'SUPERVISOR', gender: 'M', desig: 2, dept: 1, punch: 1010 },
-    { empNo: '1011', first: 'David', last: 'Miller', role: 'SUPERVISOR', gender: 'M', desig: 2, dept: 1, punch: 1011 },
-    { empNo: '1012', first: 'James', last: 'Wilson', role: 'SUPERVISOR', gender: 'M', desig: 2, dept: 1, punch: 1012 },
-    { empNo: '1013', first: 'Sarah', last: 'Connor', role: 'SUPERVISOR', gender: 'F', desig: 2, dept: 1, punch: 1013 },
-    { empNo: '1014', first: 'Michael', last: 'Knight', role: 'CONTROLROOM', gender: 'M', desig: 2, dept: 1, punch: 1014 },
-    { empNo: '1015', first: 'Ellen', last: 'Ripley', role: 'CONTROLROOM', gender: 'F', desig: 2, dept: 1, punch: 1015 },
-    { empNo: '1016', first: 'Arthur', last: 'Pendelton', role: 'CONTROLROOM', gender: 'M', desig: 2, dept: 1, punch: 1016 },
+    { empNo: '1009', first: 'Robert', last: 'Vance', role: 'USER', gender: 'M', desig: 1, dept: 1, punch: 1009 },
+    { empNo: '1010', first: 'Marcus', last: 'Aurelius', role: 'USER', gender: 'M', desig: 2, dept: 1, punch: 1010 },
+    { empNo: '1011', first: 'David', last: 'Miller', role: 'USER', gender: 'M', desig: 2, dept: 1, punch: 1011 },
+    { empNo: '1012', first: 'James', last: 'Wilson', role: 'USER', gender: 'M', desig: 2, dept: 1, punch: 1012 },
+    { empNo: '1013', first: 'Sarah', last: 'Connor', role: 'USER', gender: 'F', desig: 2, dept: 1, punch: 1013 },
+    { empNo: '1014', first: 'Michael', last: 'Knight', role: 'USER', gender: 'M', desig: 2, dept: 1, punch: 1014 },
+    { empNo: '1015', first: 'Ellen', last: 'Ripley', role: 'USER', gender: 'F', desig: 2, dept: 1, punch: 1015 },
+    { empNo: '1016', first: 'Arthur', last: 'Pendelton', role: 'USER', gender: 'M', desig: 2, dept: 1, punch: 1016 },
   ];
 
   // Guards 1005..1008 and 1017..1050 (38 Guards: 28 Male, 10 Female)

@@ -18,8 +18,18 @@ import {
   Pagination,
   Alert,
   AlertTitle,
+  Select,
+  MenuItem,
+  Chip,
 } from '@mui/material';
 import { InfoOutlined as InfoIcon, People as PeopleIcon } from '@mui/icons-material';
+
+const CATEGORY_COLORS = {
+  1: { label: 'Un-Skilled', color: 'default' },
+  2: { label: 'Semi-Skilled', color: 'info' },
+  3: { label: 'Skilled', color: 'primary' },
+  4: { label: 'High-Skilled', color: 'error' },
+};
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -68,14 +78,14 @@ const EmployeesPage = () => {
             Employee Master Guide
           </AlertTitle>
           <Typography variant="body2" sx={{ fontSize: '0.875rem', opacity: 0.9 }}>
-            This administrative module manages security staff personnel records, department assignments, biometric punch cards, and employee contact details.
+            This administrative module manages security staff personnel records, department assignments, skill tier categories, and employee contact details.
           </Typography>
           <Box display="flex" gap={2} flexWrap="wrap" sx={{ mt: 1, pt: 0.5, borderTop: '1px dashed rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>
             <Typography variant="caption" sx={{ color: '#bfdbfe' }}>
-              • <strong>Personnel Details:</strong> Department, designation, gender, and biometric punch card numbers.
+              • <strong>Skill Tiers:</strong> High-Skilled & Skilled (Critical Posts), Semi-Skilled (Priority 2 & 3 Posts), Un-Skilled (Priority 4 & 5 Posts).
             </Typography>
             <Typography variant="caption" sx={{ color: '#bfdbfe' }}>
-              • <strong>Contact Information:</strong> Official email address and primary contact phone numbers.
+              • <strong>Personnel Details:</strong> Department, designation, gender, and biometric punch card numbers.
             </Typography>
           </Box>
         </Alert>
@@ -88,7 +98,7 @@ const EmployeesPage = () => {
             Employee Master
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage security staff personnel records, department assignments, and contact details
+            Manage security staff personnel records, skill categories, and contact details
           </Typography>
         </Box>
       </Box>
@@ -115,6 +125,7 @@ const EmployeesPage = () => {
                   <TableCell sx={{ fontWeight: 700 }}>Emp No</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Employee Name</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Department & Designation</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Skill Category</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>Gender</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>Punch Card #</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Email Address</TableCell>
@@ -124,13 +135,13 @@ const EmployeesPage = () => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                       <CircularProgress size={30} />
                     </TableCell>
                   </TableRow>
                 ) : employees.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                       No employees found.
                     </TableCell>
                   </TableRow>
@@ -150,6 +161,20 @@ const EmployeesPage = () => {
                           <Typography variant="caption" color="text.secondary">
                             {emp.designation?.Designation || 'Guard'}
                           </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          {(() => {
+                            const catCode = emp.CategoryCode || 1;
+                            const catInfo = CATEGORY_COLORS[catCode] || { label: emp.category?.CategoryName || 'Un-Skilled', color: 'default' };
+                            return (
+                              <Chip
+                                label={catInfo.label}
+                                size="small"
+                                color={catInfo.color}
+                                sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                              />
+                            );
+                          })()}
                         </TableCell>
                         <TableCell align="center">{emp.Gender === 'F' ? 'Female 👩' : 'Male 👨'}</TableCell>
                         <TableCell align="center" sx={{ fontFamily: 'monospace' }}>{emp.PunchCardNo || emp.EmpNo}</TableCell>

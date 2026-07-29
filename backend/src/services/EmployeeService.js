@@ -15,6 +15,10 @@ class EmployeeService {
   async updateEmployeeRole(empNo, securityRole) {
     return await employeeRepository.updateRole(empNo, securityRole);
   }
+
+  async updateEmployeeCategory(empNo, categoryCode) {
+    return await employeeRepository.updateCategory(empNo, categoryCode);
+  }
 }
 
 module.exports = new EmployeeService();

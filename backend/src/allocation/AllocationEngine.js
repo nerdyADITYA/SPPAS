@@ -50,7 +50,7 @@ class AllocationEngine {
       },
       include: {
         employee: {
-          include: { personal: true, dates: true },
+          include: { personal: true, dates: true, category: true },
         },
       },
       orderBy: { PunchTime: 'asc' }, // Earlier reporting time first
@@ -84,6 +84,8 @@ class AllocationEngine {
       const emp = attendance.employee;
       if (!emp || alreadyDeployedEmpNos.has(emp.EmpNo)) return false;
 
+      const empCategory = emp.CategoryCode || 1; // 1: Un-Skilled, 2: Semi-Skilled, 3: Skilled, 4: High-Skilled
+
       // Dynamically sort candidate posts for this allocation step
       const candidatePosts = [...activePosts].sort((a, b) => {
         // Primary: Priority ASC (Priority 1 Critical Posts first)
@@ -107,12 +109,32 @@ class AllocationEngine {
         const currentCount = postCurrentCounts[post.PostCode] || 0;
         const capLimit = passMode === 'MIN' ? post.MinimumGuards : post.MaximumGuards;
 
-        // Check capacity limit for this pass
+        // Constraint A: Check capacity limit for this pass
         if (currentCount >= capLimit) continue;
 
-        // Check Female-Only Restriction
+        // Constraint B: Check Female-Only Restriction
         if (activeRule.GenderBasedAllocation === 'Y' && post.FemaleOnly === 'Y' && emp.Gender !== 'F') {
           continue;
+        }
+
+        // Constraint C: Skill Category Matching Rules
+        if (activeRule.SkillBasedAllocation === 'Y') {
+          if (post.Priority === 1) {
+            // Priority 1 (Critical Posts): Only High-Skilled (4) or Skilled (3) guards
+            if (empCategory !== 4 && empCategory !== 3) {
+              continue;
+            }
+          } else if (post.Priority === 2 || post.Priority === 3) {
+            // Priority 2 & 3 Posts: Only Semi-Skilled (2) guards
+            if (empCategory !== 2) {
+              continue;
+            }
+          } else if (post.Priority === 4 || post.Priority === 5) {
+            // Priority 4 & 5 Posts: Only Un-Skilled (1) guards
+            if (empCategory !== 1) {
+              continue;
+            }
+          }
         }
 
         // Post matches all rules for this pass! Execute DB transaction allocation

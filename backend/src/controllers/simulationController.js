@@ -162,45 +162,32 @@ class SimulationController {
     try {
       const today = getNormalizedToday();
 
-      // Delete today's deployments, deployment history, and attendance records
+      // Complete reset: Clear all attendance punches, guard post deployments, history trails, alerts, and vacancies
       await prisma.$transaction([
-        prisma.securityalertlog.deleteMany({
-          where: {
-            CreatedDateTime: { gte: today },
-          },
-        }),
-        prisma.securitydeploymenthistory.deleteMany({
-          where: {
-            CreatedDateTime: { gte: today },
-          },
-        }),
-        prisma.securitydeployment.deleteMany({
-          where: { DeploymentDate: today },
-        }),
-        prisma.securityattendance.deleteMany({
-          where: { PunchDate: today },
-        }),
-        prisma.securitypostvacancy.deleteMany({
-          where: { VacancyDate: today },
-        }),
+        prisma.securityalertlog.deleteMany({}),
+        prisma.securitydeploymenthistory.deleteMany({}),
+        prisma.securitydeployment.deleteMany({}),
+        prisma.securityattendance.deleteMany({}),
+        prisma.securitypostvacancy.deleteMany({}),
       ]);
 
-      // Re-populate initial vacancies for active posts
+      // Re-populate initial vacancies for active posts for today
       const activePosts = await prisma.securitypostmaster.findMany({
         where: { Enable: 'Y' },
         include: { postCategory: true, location: true },
       });
       await allocationEngine.updateVacancyStatistics(today, 1, activePosts);
 
-      // Emit Socket.IO Refresh
+      // Emit Socket.IO Refresh to all client dashboards
       try {
         const io = getIO();
         io.emit('DashboardUpdated');
+        io.emit('AccessRightsUpdated');
       } catch (err) {
         // Socket silent fallback
       }
 
-      return sendSuccess(res, "Today's attendance and guard allocations reset successfully to clean slate!");
+      return sendSuccess(res, "All simulation attendance punches and guard deployments reset successfully to clean slate!");
     } catch (error) {
       next(error);
     }

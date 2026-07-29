@@ -88,6 +88,8 @@ model categorymaster {
   ResponsibleAddress     String?   @db.Text
   ResponsiblePhone       String?   @db.Text
   ResponsibleEmail       String?   @db.Text
+
+  employees             employeemaster[]
 }
 
 model departmentmaster {
@@ -256,6 +258,7 @@ model employeemaster {
   department           departmentmaster? @relation(fields: [DepartmentCode], references: [DepartmentCode])
   designation          designationmaster? @relation(fields: [DesignationCode], references: [DesignationCode])
   location             locationmaster?    @relation(fields: [LocationCode], references: [LocationCode])
+  category             categorymaster?    @relation(fields: [CategoryCode], references: [CategoryCode])
 
   dates                employeedates?
   personal             employeepersonal?

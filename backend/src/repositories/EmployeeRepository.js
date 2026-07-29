@@ -30,6 +30,7 @@ class EmployeeRepository {
           department: true,
           designation: true,
           location: true,
+          category: true,
           personal: true,
           dates: true,
         },
@@ -54,6 +55,7 @@ class EmployeeRepository {
         department: true,
         designation: true,
         location: true,
+        category: true,
         personal: true,
         dates: true,
       },
@@ -64,6 +66,14 @@ class EmployeeRepository {
     return await prisma.employeemaster.update({
       where: { EmpNo: empNo },
       data: { SecurityRole: securityRole, UpdateDateTime: new Date() },
+    });
+  }
+
+  async updateCategory(empNo, categoryCode) {
+    return await prisma.employeemaster.update({
+      where: { EmpNo: empNo },
+      data: { CategoryCode: Number(categoryCode), UpdateDateTime: new Date() },
+      include: { category: true },
     });
   }
 }

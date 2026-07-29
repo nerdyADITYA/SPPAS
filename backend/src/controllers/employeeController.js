@@ -32,6 +32,17 @@ class EmployeeController {
       next(error);
     }
   }
+
+  async updateCategory(req, res, next) {
+    try {
+      const { empNo } = req.params;
+      const { categoryCode } = req.body;
+      const result = await employeeService.updateEmployeeCategory(empNo, categoryCode);
+      return sendSuccess(res, 'Employee category updated successfully', result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new EmployeeController();

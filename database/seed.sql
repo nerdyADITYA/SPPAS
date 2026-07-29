@@ -10,9 +10,13 @@ INSERT INTO `company` (`CompanyCode`, `CompanyName`, `CompanyEnable`, `CompanyTy
 VALUES (1, 'Main Plant Facility', 'Y', 'PRINCIPAL')
 ON DUPLICATE KEY UPDATE `CompanyName` = VALUES(`CompanyName`);
 
--- 2. Insert Category
-INSERT INTO `categorymaster` (`CategoryCode`, `CategoryName`, `Enable`)
-VALUES (1, 'Security Staff', 'Y')
+-- 2. Insert Category Master Records
+INSERT INTO `categorymaster` (`CategoryCode`, `CategoryName`, `GroupCategory`, `Enable`)
+VALUES 
+  (1, 'Un-Skilled', 'SKILL', 'Y'),
+  (2, 'Semi-Skilled', 'SKILL', 'Y'),
+  (3, 'Skilled', 'SKILL', 'Y'),
+  (4, 'High-Skilled', 'SKILL', 'Y')
 ON DUPLICATE KEY UPDATE `CategoryName` = VALUES(`CategoryName`);
 
 -- 3. Insert Department

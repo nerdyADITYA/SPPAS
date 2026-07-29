@@ -166,14 +166,14 @@ const DashboardPage = () => {
 
   // 3. Reset Simulation Data Back to Clean State
   const handleResetSimulation = async () => {
-    if (!window.confirm("Are you sure you want to reset today's simulation data? This will clear today's attendance punches and guard deployments so you can re-test from scratch.")) {
+    if (!window.confirm("Are you sure you want to reset simulation data? This will clear all attendance punches and guard deployments so you can re-test from scratch.")) {
       return;
     }
     setResetting(true);
     try {
       const res = await api.post('/simulation/reset');
       enqueueSnackbar(res.data.message, { variant: 'info' });
-      addLog("Today's simulation data reset back to clean slate.", 'system');
+      addLog("Simulation data reset back to clean slate.", 'system');
       fetchDashboardData();
     } catch (err) {
       enqueueSnackbar(err.response?.data?.message || 'Reset failed', { variant: 'error' });
