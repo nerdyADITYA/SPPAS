@@ -1,0 +1,154 @@
+{
+  "ADMIN": {
+    "dashboard": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "attendance": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "deployment": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "posts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "devices": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "alerts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "reports": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "shifts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "employees": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    }
+  },
+  "SUPERVISOR": {
+    "dashboard": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "attendance": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "deployment": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "posts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "devices": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "alerts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "reports": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "shifts": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "employees": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    }
+  },
+  "CONTROLROOM": {
+    "dashboard": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "attendance": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "deployment": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "posts": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "devices": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "alerts": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "reports": {
+      "enabled": true,
+      "accessLevel": "FULL_ACCESS"
+    },
+    "shifts": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "employees": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    }
+  },
+  "USER": {
+    "dashboard": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "attendance": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "deployment": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "posts": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "devices": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "alerts": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "reports": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "shifts": {
+      "enabled": true,
+      "accessLevel": "VIEW_ONLY"
+    },
+    "employees": {
+      "enabled": false,
+      "accessLevel": "VIEW_ONLY"
+    }
+  }
+}

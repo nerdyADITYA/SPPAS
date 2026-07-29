@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useGuide } from '../contexts/GuideContext';
+import { useAccessRights } from '../contexts/AccessRightsContext';
 import {
   Box,
   Drawer,
@@ -37,24 +38,29 @@ import {
   Logout as LogoutIcon,
   Shield as ShieldIcon,
   HelpOutline as HelpIcon,
+  AccessTime as ShiftIcon,
+  AdminPanelSettings as AccessRightsIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 260;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'] },
-  { text: 'Attendance Log', icon: <AttendanceIcon />, path: '/attendance', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'] },
-  { text: 'Post Deployments', icon: <DeploymentIcon />, path: '/deployment', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'] },
-  { text: 'Security Duty Posts', icon: <PostsIcon />, path: '/posts', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR'] },
-  { text: 'Biometric Devices', icon: <DevicesIcon />, path: '/devices', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'] },
-  { text: 'Alert Center', icon: <AlertsIcon />, path: '/alerts', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'] },
-  { text: 'System Reports', icon: <ReportsIcon />, path: '/reports', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'] },
-  { text: 'Employees', icon: <EmployeesIcon />, path: '/employees', roles: ['SUPERADMIN', 'ADMIN'] },
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'], moduleKey: 'dashboard' },
+  { text: 'Attendance Log', icon: <AttendanceIcon />, path: '/attendance', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'], moduleKey: 'attendance' },
+  { text: 'Post Deployments', icon: <DeploymentIcon />, path: '/deployment', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'], moduleKey: 'deployment' },
+  { text: 'Security Duty Posts', icon: <PostsIcon />, path: '/posts', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR'], moduleKey: 'posts' },
+  { text: 'Biometric Devices', icon: <DevicesIcon />, path: '/devices', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'], moduleKey: 'devices' },
+  { text: 'Alert Center', icon: <AlertsIcon />, path: '/alerts', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'], moduleKey: 'alerts' },
+  { text: 'System Reports', icon: <ReportsIcon />, path: '/reports', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM'], moduleKey: 'reports' },
+  { text: 'Shift Master', icon: <ShiftIcon />, path: '/shifts', roles: ['SUPERADMIN', 'ADMIN', 'SUPERVISOR', 'CONTROLROOM', 'USER'], moduleKey: 'shifts' },
+  { text: 'Employees', icon: <EmployeesIcon />, path: '/employees', roles: ['SUPERADMIN', 'ADMIN'], moduleKey: 'employees' },
+  { text: 'Access Rights', icon: <AccessRightsIcon />, path: '/access-rights', roles: ['SUPERADMIN'], moduleKey: 'access-rights' },
 ];
 
 const AppLayout = () => {
   const { user, logout } = useAuth();
   const { guideMode, toggleGuideMode } = useGuide();
+  const { hasPageAccess } = useAccessRights();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -93,6 +99,7 @@ const AppLayout = () => {
       <List sx={{ flexGrow: 1, px: 1.5, py: 2 }}>
         {menuItems.map((item) => {
           if (item.roles && !item.roles.includes(userRole)) return null;
+          if (item.moduleKey && !hasPageAccess(item.moduleKey)) return null;
           const isSelected = currentPath === item.path;
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>

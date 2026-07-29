@@ -28,6 +28,15 @@ import {
   AlertTitle,
 } from '@mui/material';
 import { Add as AddIcon, InfoOutlined as InfoIcon } from '@mui/icons-material';
+import { useAccessRights } from '../contexts/AccessRightsContext';
+
+const PRIORITY_OPTIONS = [
+  { value: 1, label: '1 (Critical)', color: 'error' },
+  { value: 2, label: '2 (High)', color: 'warning' },
+  { value: 3, label: '3 (Medium)', color: 'info' },
+  { value: 4, label: '4 (Low)', color: 'default' },
+  { value: 5, label: '5 (Very Low)', color: 'default' },
+];
 
 const PostsPage = () => {
   const [posts, setPosts] = useState([]);
@@ -36,6 +45,7 @@ const PostsPage = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const { guideMode } = useGuide();
+  const { canMutate } = useAccessRights();
 
   const [formData, setFormData] = useState({
     PostName: '',
@@ -44,7 +54,7 @@ const PostsPage = () => {
     Priority: 1,
     MinimumGuards: 1,
     MaximumGuards: 1,
-    CriticalPost: 'N',
+    CriticalPost: 'Y',
     FemaleOnly: 'N',
   });
 
@@ -68,9 +78,22 @@ const PostsPage = () => {
     fetchPosts();
   }, []);
 
+  const handlePriorityChange = (newPriority) => {
+    const val = Number(newPriority);
+    setFormData({
+      ...formData,
+      Priority: val,
+      CriticalPost: val === 1 ? 'Y' : 'N',
+    });
+  };
+
   const handleCreatePost = async () => {
     try {
-      await api.post('/posts', formData);
+      const payload = {
+        ...formData,
+        CriticalPost: Number(formData.Priority) === 1 ? 'Y' : 'N',
+      };
+      await api.post('/posts', payload);
       setOpenModal(false);
       fetchPosts();
     } catch (err) {
@@ -101,10 +124,10 @@ const PostsPage = () => {
           </Typography>
           <Box display="flex" gap={2} flexWrap="wrap" sx={{ mt: 1, pt: 0.5, borderTop: '1px dashed rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>
             <Typography variant="caption" sx={{ color: '#bfdbfe' }}>
-              • <strong>Priority Rating (1 = Highest):</strong> Determines sequence during automatic guard allocation.
+              • <strong>Priority Rating:</strong> Priority 1 is automatically designated as <strong>Critical</strong> and allocated first.
             </Typography>
             <Typography variant="caption" sx={{ color: '#bfdbfe' }}>
-              • <strong>Critical Post:</strong> High-risk locations (e.g. Data Center, Main Gates) prioritized before standard posts.
+              • <strong>Critical Tag:</strong> Automatically set to YES exclusively for Priority 1 posts (e.g. Data Center, Main Gates).
             </Typography>
             <Typography variant="caption" sx={{ color: '#bfdbfe' }}>
               • <strong>Female Only:</strong> Mandatory restriction requiring female security personnel (e.g. Female Frisking Bay).
@@ -119,17 +142,19 @@ const PostsPage = () => {
             Security Duty Post Master
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Configure post requirements, priorities, and allocation constraints
+            Configure post requirements, priority tiers (1-5), and allocation constraints
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => setOpenModal(true)}
-        >
-          Add New Duty Post
-        </Button>
+        {canMutate('posts') && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenModal(true)}
+          >
+            Add New Duty Post
+          </Button>
+        )}
       </Box>
 
       <Card>
@@ -137,15 +162,15 @@ const PostsPage = () => {
           <TableContainer component={Paper} elevation={0} sx={{ bgcolor: 'transparent' }}>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Post Name</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Priority</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Min Guards</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Max Guards</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Critical</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Female Only</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Status</TableCell>
+                <TableRow sx={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
+                  <TableCell sx={{ fontWeight: 700 }}>Post Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Priority</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Min Guards</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Max Guards</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Critical</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Female Only</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>Status</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -162,36 +187,49 @@ const PostsPage = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  posts.map((p) => (
-                    <TableRow key={p.PostCode} hover>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        {p.PostName} ({p.PostShortName})
-                      </TableCell>
-                      <TableCell>{p.postCategory?.PostCategoryName}</TableCell>
-                      <TableCell align="center">
-                        <Chip label={`Priority ${p.Priority}`} size="small" color={p.Priority === 1 ? 'error' : 'default'} sx={{ height: 20, fontSize: '0.7rem' }} />
-                      </TableCell>
-                      <TableCell align="center">{p.MinimumGuards}</TableCell>
-                      <TableCell align="center">{p.MaximumGuards}</TableCell>
-                      <TableCell align="center">
-                        {p.CriticalPost === 'Y' ? (
-                          <Chip label="YES" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem' }} />
-                        ) : (
-                          'NO'
-                        )}
-                      </TableCell>
-                      <TableCell align="center">
-                        {p.FemaleOnly === 'Y' ? (
-                          <Chip label="YES" size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
-                        ) : (
-                          'NO'
-                        )}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip label={p.Enable === 'Y' ? 'ACTIVE' : 'INACTIVE'} size="small" color={p.Enable === 'Y' ? 'success' : 'default'} sx={{ height: 20, fontSize: '0.7rem' }} />
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  posts.map((p) => {
+                    const isCritical = Number(p.Priority) === 1;
+                    const priorityOpt = PRIORITY_OPTIONS.find((opt) => opt.value === Number(p.Priority)) || {
+                      label: `Priority ${p.Priority}`,
+                      color: 'default',
+                    };
+
+                    return (
+                      <TableRow key={p.PostCode} hover>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          {p.PostName} ({p.PostShortName})
+                        </TableCell>
+                        <TableCell>{p.postCategory?.PostCategoryName}</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={`Priority ${p.Priority}`}
+                            size="small"
+                            color={priorityOpt.color}
+                            sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">{p.MinimumGuards}</TableCell>
+                        <TableCell align="center">{p.MaximumGuards}</TableCell>
+                        <TableCell align="center">
+                          {isCritical ? (
+                            <Chip label="YES" size="small" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                          ) : (
+                            'NO'
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          {p.FemaleOnly === 'Y' ? (
+                            <Chip label="YES" size="small" color="secondary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          ) : (
+                            'NO'
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip label={p.Enable === 'Y' ? 'ACTIVE' : 'INACTIVE'} size="small" color={p.Enable === 'Y' ? 'success' : 'default'} sx={{ height: 20, fontSize: '0.7rem' }} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -229,14 +267,22 @@ const PostsPage = () => {
               </MenuItem>
             ))}
           </TextField>
+
           <Box display="flex" gap={2}>
+            {/* Priority Dropdown Select (1 to 5 with descriptions in brackets) */}
             <TextField
-              label="Priority (1-5)"
-              type="number"
+              select
+              label="Priority"
               fullWidth
               value={formData.Priority}
-              onChange={(e) => setFormData({ ...formData, Priority: Number(e.target.value) })}
-            />
+              onChange={(e) => handlePriorityChange(e.target.value)}
+            >
+              {PRIORITY_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               label="Min Guards"
               type="number"
@@ -252,16 +298,33 @@ const PostsPage = () => {
               onChange={(e) => setFormData({ ...formData, MaximumGuards: Number(e.target.value) })}
             />
           </Box>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={formData.CriticalPost === 'Y'}
-                onChange={(e) => setFormData({ ...formData, CriticalPost: e.target.checked ? 'Y' : 'N' })}
-                color="error"
-              />
-            }
-            label="Critical Post (Highest Allocation Priority)"
-          />
+
+          {/* Automatic Critical Tag Indicator */}
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1.5}
+            sx={{
+              p: 1.5,
+              borderRadius: 1.5,
+              bgcolor: formData.Priority === 1 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid',
+              borderColor: formData.Priority === 1 ? 'error.main' : 'rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <Chip
+              label={formData.Priority === 1 ? 'YES - CRITICAL POST' : 'NO - STANDARD POST'}
+              size="small"
+              color={formData.Priority === 1 ? 'error' : 'default'}
+              sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              {formData.Priority === 1
+                ? 'Automatically tagged as Critical (Highest allocation priority & emergency alert tracking)'
+                : 'Standard priority post (No emergency alert tracking)'}
+            </Typography>
+          </Box>
+
           <FormControlLabel
             control={
               <Switch

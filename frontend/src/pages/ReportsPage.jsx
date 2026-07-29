@@ -26,6 +26,7 @@ import {
   Alert,
   AlertTitle,
   Tooltip,
+  Chip,
 } from '@mui/material';
 import {
   Download as ExportIcon,
@@ -464,7 +465,33 @@ const ReportsPage = () => {
                           <TableCell align="center">{row.RequiredGuards}</TableCell>
                           <TableCell align="center">{row.AllocatedGuards}</TableCell>
                           <TableCell align="center">{row.VacantGuards}</TableCell>
-                          <TableCell align="center">{row.Status}</TableCell>
+                          <TableCell align="center">
+                            {(() => {
+                              const s = String(row.Status || '').toUpperCase();
+                              let chipLabel = row.Status || 'VACANT';
+                              let chipColor = 'error';
+
+                              if (s.includes('FULL') || s.includes('FILLED')) {
+                                chipLabel = 'FULLY_ALLOCATED';
+                                chipColor = 'success';
+                              } else if (s.includes('PARTIAL')) {
+                                chipLabel = 'PARTIALLY_ALLOCATED';
+                                chipColor = 'warning';
+                              } else {
+                                chipLabel = 'VACANT';
+                                chipColor = 'error';
+                              }
+
+                              return (
+                                <Chip
+                                  label={chipLabel}
+                                  color={chipColor}
+                                  size="small"
+                                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                                />
+                              );
+                            })()}
+                          </TableCell>
                         </>
                       )}
                     </TableRow>

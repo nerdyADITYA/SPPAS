@@ -15,6 +15,8 @@ const alertRoutes = require('./alertRoutes');
 const reportRoutes = require('./reportRoutes');
 const simulationRoutes = require('./simulationRoutes');
 const healthRoutes = require('./healthRoutes');
+const shiftRoutes = require('./shiftRoutes');
+const accessRightsRoutes = require('./accessRightsRoutes');
 
 router.use('/auth', authRoutes);
 router.use('/login', authRoutes); // Map /login directly for convenience
@@ -31,5 +33,7 @@ router.use('/alerts', alertRoutes);
 router.use('/reports', reportRoutes);
 router.use('/simulation', simulationRoutes);
 router.use('/health', healthRoutes);
+router.use('/shifts', shiftRoutes);
+router.use('/access-rights', accessRightsRoutes);
 
 module.exports = router;

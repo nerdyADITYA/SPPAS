@@ -416,11 +416,31 @@ const DashboardPage = () => {
                             {row.VacantGuards}
                           </TableCell>
                           <TableCell align="center">
-                            <Chip
-                              label={row.Status}
-                              color={row.Status === 'FILLED' ? 'success' : row.Status === 'PARTIAL' ? 'warning' : 'error'}
-                              size="small"
-                            />
+                            {(() => {
+                              const s = String(row.Status || '').toUpperCase();
+                              let chipLabel = row.Status || 'VACANT';
+                              let chipColor = 'error';
+
+                              if (s.includes('FULL') || s.includes('FILLED')) {
+                                chipLabel = 'FULLY_ALLOCATED';
+                                chipColor = 'success';
+                              } else if (s.includes('PARTIAL')) {
+                                chipLabel = 'PARTIALLY_ALLOCATED';
+                                chipColor = 'warning';
+                              } else {
+                                chipLabel = 'VACANT';
+                                chipColor = 'error';
+                              }
+
+                              return (
+                                <Chip
+                                  label={chipLabel}
+                                  color={chipColor}
+                                  size="small"
+                                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                                />
+                              );
+                            })()}
                           </TableCell>
                         </TableRow>
                       ))

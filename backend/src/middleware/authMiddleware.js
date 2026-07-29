@@ -19,8 +19,15 @@ async function authenticate(req, res, next) {
   }
 
   // Validate active session token
-  if (decoded.sessionId && !sessionStore.isSessionValid(decoded.empNo, decoded.sessionId)) {
-    return sendError(res, 'Session terminated. You were logged out because a login occurred on another device.', [], 401);
+  if (decoded.sessionId) {
+    if (sessionStore.hasSession(decoded.empNo)) {
+      if (!sessionStore.isSessionValid(decoded.empNo, decoded.sessionId)) {
+        return sendError(res, 'Session terminated. You were logged out because a login occurred on another device.', [], 401);
+      }
+    } else {
+      // Server restarted or memory session lost, but JWT is valid -> restore session
+      sessionStore.createSession(decoded.empNo, token, decoded.sessionId);
+    }
   }
 
   try {
@@ -63,7 +70,35 @@ function authorize(roles = []) {
   };
 }
 
+function checkModuleAccess(moduleKey, actionType = 'READ') {
+  return (req, res, next) => {
+    if (!req.user) {
+      return sendError(res, MESSAGES.UNAUTHORIZED, [], 401);
+    }
+
+    const role = req.user.SecurityRole;
+    if (role === 'SUPERADMIN') {
+      return next();
+    }
+
+    const accessRightsRepository = require('../repositories/AccessRightsRepository');
+    const rolePerms = accessRightsRepository.getPermissionsForRole(role);
+    const modPerm = rolePerms[moduleKey];
+
+    if (!modPerm || modPerm.enabled === false) {
+      return sendError(res, `Access to '${moduleKey}' module has been disabled by SuperAdmin.`, [], 403);
+    }
+
+    if (actionType === 'MUTATE' && modPerm.accessLevel === 'VIEW_ONLY') {
+      return sendError(res, `Action restricted: You have View Only access to '${moduleKey}'.`, [], 403);
+    }
+
+    next();
+  };
+}
+
 module.exports = {
   authenticate,
   authorize,
+  checkModuleAccess,
 };

@@ -38,6 +38,10 @@ class SessionStore {
     return this.sessions.delete(String(empNo));
   }
 
+  hasSession(empNo) {
+    return this.sessions.has(String(empNo));
+  }
+
   isSessionValid(empNo, sessionId) {
     const active = this.getActiveSession(empNo);
     if (!active) return false;

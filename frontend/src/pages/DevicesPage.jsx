@@ -26,12 +26,15 @@ import {
   InfoOutlined as InfoIcon,
 } from '@mui/icons-material';
 
+import { useAccessRights } from '../contexts/AccessRightsContext';
+
 const DevicesPage = () => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
 
   const { guideMode } = useGuide();
+  const { canMutate } = useAccessRights();
 
   const [formData, setFormData] = useState({
     DeviceName: '',
@@ -112,14 +115,16 @@ const DevicesPage = () => {
           <IconButton onClick={fetchDevices} sx={{ bgcolor: 'rgba(255,255,255,0.05)' }}>
             <RefreshIcon />
           </IconButton>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenModal(true)}
-          >
-            Register Biometric Reader
-          </Button>
+          {canMutate('devices') && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => setOpenModal(true)}
+            >
+              Register Biometric Reader
+            </Button>
+          )}
         </Box>
       </Box>
 

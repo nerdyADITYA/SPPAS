@@ -26,13 +26,13 @@ class AllocationEngine {
       return { success: false, message: 'No active allocation rule configured.' };
     }
 
-    // Step 2: Load Active Security Duty Posts sorted by CriticalPost & Priority
+    // Step 2: Load Active Security Duty Posts sorted by Priority (Priority 1 Critical Posts first)
     const activePosts = await prisma.securitypostmaster.findMany({
       where: { Enable: 'Y' },
       include: { postCategory: true, location: true },
       orderBy: [
-        { CriticalPost: 'desc' }, // 'Y' first
-        { Priority: 'asc' },     // 1, 2, 3...
+        { Priority: 'asc' },     // Priority 1 (Critical) first, then 2, 3, 4...
+        { PostCode: 'asc' },
       ],
     });
 
@@ -79,93 +79,108 @@ class AllocationEngine {
 
     let allocatedCount = 0;
 
-    // Step 4: Iterate over Pending Attendance Records
-    for (const attendance of pendingAttendances) {
+    // Helper function: Attempts to allocate a guard to an eligible post under target capacity mode ('MIN' or 'MAX')
+    const tryAllocateGuard = async (attendance, passMode) => {
       const emp = attendance.employee;
-      if (!emp) continue;
+      if (!emp || alreadyDeployedEmpNos.has(emp.EmpNo)) return false;
 
-      // Skip if guard is already deployed today
-      if (alreadyDeployedEmpNos.has(emp.EmpNo)) {
-        logger.info(`Guard ${emp.EmpNo} already deployed for this shift. Skipping.`);
-        continue;
-      }
+      // Dynamically sort candidate posts for this allocation step
+      const candidatePosts = [...activePosts].sort((a, b) => {
+        // Primary: Priority ASC (Priority 1 Critical Posts first)
+        if (a.Priority !== b.Priority) return a.Priority - b.Priority;
 
-      // Step 5: Find Highest Priority Eligible Vacant Post
-      let selectedPost = null;
+        // Secondary: CriticalPost DESC ('Y' first)
+        if (a.CriticalPost !== b.CriticalPost) {
+          return a.CriticalPost === 'Y' ? -1 : 1;
+        }
 
-      for (const post of activePosts) {
+        // Tertiary: Vacant Shortage to MinimumGuards DESC (Posts with largest unfilled gap get filled first)
+        const shortageA = a.MinimumGuards - (postCurrentCounts[a.PostCode] || 0);
+        const shortageB = b.MinimumGuards - (postCurrentCounts[b.PostCode] || 0);
+        if (shortageA !== shortageB) return shortageB - shortageA;
+
+        // Quaternary: PostCode ASC (Stable tie-breaker)
+        return a.PostCode - b.PostCode;
+      });
+
+      for (const post of candidatePosts) {
         const currentCount = postCurrentCounts[post.PostCode] || 0;
+        const capLimit = passMode === 'MIN' ? post.MinimumGuards : post.MaximumGuards;
 
-        // Constraint A: Check Capacity Limit (MaximumGuards)
-        if (currentCount >= post.MaximumGuards) {
-          continue; // Post full
-        }
+        // Check capacity limit for this pass
+        if (currentCount >= capLimit) continue;
 
-        // Constraint B: Check Female-Only Restriction
+        // Check Female-Only Restriction
         if (activeRule.GenderBasedAllocation === 'Y' && post.FemaleOnly === 'Y' && emp.Gender !== 'F') {
-          continue; // Guard is not female
+          continue;
         }
 
-        // Selected post meets all rules!
-        selectedPost = post;
-        break;
-      }
-
-      if (selectedPost) {
-        // Create Deployment in DB Transaction
+        // Post matches all rules for this pass! Execute DB transaction allocation
         await prisma.$transaction(async (tx) => {
           const deployment = await tx.securitydeployment.create({
             data: {
               DeploymentDate: targetDate,
               EmpNo: emp.EmpNo,
-              PostCode: selectedPost.PostCode,
+              PostCode: post.PostCode,
               ShiftCode: Number(shiftCode),
               ReportingTime: attendance.PunchDateTime,
               AllocationMethod: 'AUTO',
               DeploymentStatus: 'ALLOCATED',
-              Remarks: `Auto allocated to ${selectedPost.PostName}`,
+              Remarks: `Auto allocated to ${post.PostName} (${passMode} pass)`,
             },
           });
 
-          // Create History Entry
           await tx.securitydeploymenthistory.create({
             data: {
               DeploymentCode: deployment.DeploymentCode,
               EmpNo: emp.EmpNo,
-              PostCode: selectedPost.PostCode,
+              PostCode: post.PostCode,
               ShiftCode: Number(shiftCode),
               DeploymentStatus: 'ALLOCATED',
               ActionType: 'CREATED',
               ChangedBy: emp.EmpNo,
-              Remarks: 'Automatic Guard Allocation Engine',
+              Remarks: `Automatic Guard Allocation Engine (${passMode} pass)`,
             },
           });
 
-          // Mark Attendance as ALLOCATED
           await tx.securityattendance.update({
             where: { AttendanceCode: attendance.AttendanceCode },
-            data: { AttendanceStatus: 'ALLOCATED', Remarks: `Allocated to ${selectedPost.PostName}` },
+            data: { AttendanceStatus: 'ALLOCATED', Remarks: `Allocated to ${post.PostName}` },
           });
         });
 
         alreadyDeployedEmpNos.add(emp.EmpNo);
-        postCurrentCounts[selectedPost.PostCode] = (postCurrentCounts[selectedPost.PostCode] || 0) + 1;
+        postCurrentCounts[post.PostCode] = (postCurrentCounts[post.PostCode] || 0) + 1;
         allocatedCount++;
-        logger.info(`Guard ${emp.EmpNo} (${emp.FirstName} ${emp.LastName}) allocated to Post: ${selectedPost.PostName}`);
+        logger.info(`Guard ${emp.EmpNo} (${emp.FirstName} ${emp.LastName}) allocated to Post: ${post.PostName} [Priority ${post.Priority}] (${passMode} pass)`);
 
         // Trigger Automated Email Dispatch to Guard
         emailService.sendGuardDeploymentEmail({
           empNo: emp.EmpNo,
           deploymentDate: targetDate,
           shiftName: `Shift ${shiftCode}`,
-          postName: selectedPost.PostName,
-          categoryName: selectedPost.postCategory?.PostCategoryName || 'Security Gate',
-          locationName: selectedPost.location?.Location || 'Plant Premises',
-          isCritical: selectedPost.CriticalPost === 'Y',
-          remarks: `Automatically allocated by SPPAS Engine to ${selectedPost.PostName}`,
+          postName: post.PostName,
+          categoryName: post.postCategory?.PostCategoryName || 'Security Gate',
+          locationName: post.location?.Location || 'Plant Premises',
+          isCritical: post.CriticalPost === 'Y',
+          remarks: `Automatically allocated by SPPAS Engine to ${post.PostName}`,
         });
-      } else {
-        logger.warn(`No suitable vacant post available for Guard ${emp.EmpNo}`);
+
+        return true;
+      }
+
+      return false;
+    };
+
+    // PASS 1: Minimum Required Capacity Pass (Fulfill MinimumGuards across Priority tiers first)
+    for (const attendance of pendingAttendances) {
+      await tryAllocateGuard(attendance, 'MIN');
+    }
+
+    // PASS 2: Maximum Buffer Capacity Pass (Allocate remaining unassigned guards up to MaximumGuards in Priority order)
+    for (const attendance of pendingAttendances) {
+      if (!alreadyDeployedEmpNos.has(attendance.EmpNo)) {
+        await tryAllocateGuard(attendance, 'MAX');
       }
     }
 
