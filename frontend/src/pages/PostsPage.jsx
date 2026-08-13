@@ -15,6 +15,8 @@ import {
   Paper,
   Chip,
   Button,
+  IconButton,
+  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -27,7 +29,12 @@ import {
   Alert,
   AlertTitle,
 } from '@mui/material';
-import { Add as AddIcon, InfoOutlined as InfoIcon } from '@mui/icons-material';
+import {
+  Add as AddIcon,
+  InfoOutlined as InfoIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { useAccessRights } from '../contexts/AccessRightsContext';
 
 const PRIORITY_OPTIONS = [
@@ -38,25 +45,32 @@ const PRIORITY_OPTIONS = [
   { value: 5, label: '5 (Very Low)', color: 'default' },
 ];
 
+const INITIAL_FORM_DATA = {
+  PostName: '',
+  PostShortName: '',
+  PostCategoryCode: '',
+  Priority: 1,
+  MinimumGuards: 1,
+  MaximumGuards: 1,
+  CriticalPost: 'Y',
+  FemaleOnly: 'N',
+  Enable: 'Y',
+};
+
 const PostsPage = () => {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
 
   const { guideMode } = useGuide();
   const { canMutate } = useAccessRights();
 
-  const [formData, setFormData] = useState({
-    PostName: '',
-    PostShortName: '',
-    PostCategoryCode: '',
-    Priority: 1,
-    MinimumGuards: 1,
-    MaximumGuards: 1,
-    CriticalPost: 'Y',
-    FemaleOnly: 'N',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -78,6 +92,36 @@ const PostsPage = () => {
     fetchPosts();
   }, []);
 
+  const handleOpenAddModal = () => {
+    setSelectedPost(null);
+    setFormData({
+      ...INITIAL_FORM_DATA,
+      PostCategoryCode: categories.length > 0 ? categories[0].PostCategoryCode : '',
+    });
+    setOpenModal(true);
+  };
+
+  const handleEditClick = (post) => {
+    setSelectedPost(post);
+    setFormData({
+      PostName: post.PostName || '',
+      PostShortName: post.PostShortName || '',
+      PostCategoryCode: post.PostCategoryCode || (categories.length > 0 ? categories[0].PostCategoryCode : ''),
+      Priority: Number(post.Priority) || 1,
+      MinimumGuards: Number(post.MinimumGuards) || 1,
+      MaximumGuards: Number(post.MaximumGuards) || 1,
+      CriticalPost: post.CriticalPost || (Number(post.Priority) === 1 ? 'Y' : 'N'),
+      FemaleOnly: post.FemaleOnly || 'N',
+      Enable: post.Enable || 'Y',
+    });
+    setOpenModal(true);
+  };
+
+  const handleDeleteClick = (post) => {
+    setPostToDelete(post);
+    setOpenDeleteDialog(true);
+  };
+
   const handlePriorityChange = (newPriority) => {
     const val = Number(newPriority);
     setFormData({
@@ -87,17 +131,36 @@ const PostsPage = () => {
     });
   };
 
-  const handleCreatePost = async () => {
+  const handleSavePost = async () => {
     try {
       const payload = {
         ...formData,
         CriticalPost: Number(formData.Priority) === 1 ? 'Y' : 'N',
       };
-      await api.post('/posts', payload);
+
+      if (selectedPost) {
+        await api.put(`/posts/${selectedPost.PostCode}`, payload);
+      } else {
+        await api.post('/posts', payload);
+      }
+
       setOpenModal(false);
+      setSelectedPost(null);
       fetchPosts();
     } catch (err) {
-      alert(err.response?.data?.message || 'Create post failed');
+      alert(err.response?.data?.message || 'Save post failed');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return;
+    try {
+      await api.delete(`/posts/${postToDelete.PostCode}`);
+      setOpenDeleteDialog(false);
+      setPostToDelete(null);
+      fetchPosts();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Delete post failed');
     }
   };
 
@@ -150,7 +213,7 @@ const PostsPage = () => {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setOpenModal(true)}
+            onClick={handleOpenAddModal}
           >
             Add New Duty Post
           </Button>
@@ -171,18 +234,19 @@ const PostsPage = () => {
                   <TableCell align="center" sx={{ fontWeight: 700 }}>Critical</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>Female Only</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>Status</TableCell>
+                  {canMutate('posts') && <TableCell align="center" sx={{ fontWeight: 700 }}>Actions</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={canMutate('posts') ? 9 : 8} align="center" sx={{ py: 4 }}>
                       <CircularProgress size={30} />
                     </TableCell>
                   </TableRow>
                 ) : posts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                    <TableCell colSpan={canMutate('posts') ? 9 : 8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                       No duty posts found.
                     </TableCell>
                   </TableRow>
@@ -227,6 +291,32 @@ const PostsPage = () => {
                         <TableCell align="center">
                           <Chip label={p.Enable === 'Y' ? 'ACTIVE' : 'INACTIVE'} size="small" color={p.Enable === 'Y' ? 'success' : 'default'} sx={{ height: 20, fontSize: '0.7rem' }} />
                         </TableCell>
+                        {canMutate('posts') && (
+                          <TableCell align="center">
+                            <Box display="flex" justifyContent="center" gap={0.5}>
+                              <Tooltip title="Edit Duty Post">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={() => handleEditClick(p)}
+                                  sx={{ '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.15)' } }}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete Duty Post">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => handleDeleteClick(p)}
+                                  sx={{ '&:hover': { backgroundColor: 'rgba(239, 68, 68, 0.15)' } }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })
@@ -237,9 +327,11 @@ const PostsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Add Post Modal */}
+      {/* Configure / Edit Post Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Configure New Duty Post</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          {selectedPost ? `Edit Duty Post: ${selectedPost.PostName}` : 'Configure New Duty Post'}
+        </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
           <TextField
             label="Post Full Name"
@@ -335,11 +427,43 @@ const PostsPage = () => {
             }
             label="Female Security Only Restriction"
           />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.Enable === 'Y'}
+                onChange={(e) => setFormData({ ...formData, Enable: e.target.checked ? 'Y' : 'N' })}
+                color="success"
+              />
+            }
+            label="Active Duty Post Status"
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setOpenModal(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreatePost}>
-            Save Duty Post
+          <Button variant="contained" onClick={handleSavePost}>
+            {selectedPost ? 'Update Duty Post' : 'Save Duty Post'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: 'error.main' }}>
+          Confirm Delete Duty Post
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete duty post <strong>"{postToDelete?.PostName}"</strong> ({postToDelete?.PostShortName})?
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            This action will permanently remove the duty post configuration.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleConfirmDelete}>
+            Delete Post
           </Button>
         </DialogActions>
       </Dialog>

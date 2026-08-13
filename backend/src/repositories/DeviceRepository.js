@@ -3,6 +3,7 @@ const { prisma } = require('../config/prisma');
 class DeviceRepository {
   async findAll() {
     return await prisma.securitydevicemaster.findMany({
+      where: { Enable: 'Y' },
       include: { location: true },
       orderBy: { DeviceCode: 'asc' },
     });

@@ -19,8 +19,10 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data.data);
           localStorage.setItem('sppas_user', JSON.stringify(res.data.data));
         })
-        .catch(() => {
-          logout();
+        .catch((err) => {
+          if (err.response && err.response.status === 401) {
+            logout();
+          }
         })
         .finally(() => setLoading(false));
     } else {

@@ -8,6 +8,7 @@ import theme from './theme/theme';
 import { AuthProvider } from './contexts/AuthContext';
 import { GuideProvider } from './contexts/GuideContext';
 import { AccessRightsProvider } from './contexts/AccessRightsContext';
+import { HealthSyncProvider } from './contexts/HealthSyncContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 
@@ -34,31 +35,33 @@ function App() {
           <AuthProvider>
             <AccessRightsProvider>
               <GuideProvider>
-                <BrowserRouter>
-                  <Routes>
-                    {/* Public Route */}
-                    <Route path="/login" element={<LoginPage />} />
+                <HealthSyncProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      {/* Public Route */}
+                      <Route path="/login" element={<LoginPage />} />
 
-                    {/* Protected App Routes */}
-                    <Route element={<ProtectedRoute />}>
-                      <Route element={<AppLayout />}>
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/attendance" element={<AttendancePage />} />
-                        <Route path="/deployment" element={<DeploymentPage />} />
-                        <Route path="/posts" element={<PostsPage />} />
-                        <Route path="/devices" element={<DevicesPage />} />
-                        <Route path="/alerts" element={<AlertsPage />} />
-                        <Route path="/reports" element={<ReportsPage />} />
-                        <Route path="/shifts" element={<ShiftMasterPage />} />
-                        <Route path="/employees" element={<EmployeesPage />} />
-                        <Route path="/access-rights" element={<AccessRightsPage />} />
+                      {/* Protected App Routes */}
+                      <Route element={<ProtectedRoute />}>
+                        <Route element={<AppLayout />}>
+                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                          <Route path="/dashboard" element={<DashboardPage />} />
+                          <Route path="/attendance" element={<AttendancePage />} />
+                          <Route path="/deployment" element={<DeploymentPage />} />
+                          <Route path="/posts" element={<PostsPage />} />
+                          <Route path="/devices" element={<DevicesPage />} />
+                          <Route path="/alerts" element={<AlertsPage />} />
+                          <Route path="/reports" element={<ReportsPage />} />
+                          <Route path="/shifts" element={<ShiftMasterPage />} />
+                          <Route path="/employees" element={<EmployeesPage />} />
+                          <Route path="/access-rights" element={<AccessRightsPage />} />
+                        </Route>
                       </Route>
-                    </Route>
 
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                  </Routes>
-                </BrowserRouter>
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    </Routes>
+                  </BrowserRouter>
+                </HealthSyncProvider>
               </GuideProvider>
             </AccessRightsProvider>
           </AuthProvider>

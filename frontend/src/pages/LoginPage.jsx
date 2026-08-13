@@ -346,17 +346,16 @@ const LoginPage = () => {
                             </Typography>
                           </Box>
                         </Box>
-                        <Button
-                          size="small"
+                        <Chip
+                          label="Auto-Fill"
                           variant="outlined"
-                          sx={{ borderColor: item.color, color: item.color, fontSize: '0.7rem', py: 0.2, px: 1 }}
+                          size="small"
+                          sx={{ borderColor: item.color, color: item.color, fontSize: '0.7rem', height: 24, cursor: 'pointer', fontWeight: 600 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleAutoFill(item.empNo, item.password);
                           }}
-                        >
-                          Auto-Fill
-                        </Button>
+                        />
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails sx={{ bgcolor: 'rgba(0, 0, 0, 0.2)', p: 2 }}>

@@ -8,6 +8,16 @@ class AttendanceService {
 
   async importAttendance(data) {
     const { empNo, punchDate, punchTime, deviceCode, shiftCode, punchType = 'IN' } = data;
+    const { prisma } = require('../config/prisma');
+
+    const cleanEmpNo = String(empNo).trim();
+    const employee = await prisma.employeemaster.findUnique({
+      where: { EmpNo: cleanEmpNo }
+    });
+
+    if (!employee) {
+      throw new Error(`Employee #${empNo} is not registered in Employee Master. Please enroll your fingerprint/face under Guard ID #1005 to #1050 on your physical biometric terminal.`);
+    }
 
     const punchDateTimeStr = `${punchDate}T${punchTime}`;
     const punchDateTime = new Date(punchDateTimeStr);

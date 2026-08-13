@@ -18,12 +18,15 @@ import {
   IconButton,
   Alert,
   AlertTitle,
+  Tooltip,
 } from '@mui/material';
 import {
   PhonelinkSetup as DeviceIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
   InfoOutlined as InfoIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 
 import { useAccessRights } from '../contexts/AccessRightsContext';
@@ -32,6 +35,7 @@ const DevicesPage = () => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
+  const [editingDevice, setEditingDevice] = useState(null);
 
   const { guideMode } = useGuide();
   const { canMutate } = useAccessRights();
@@ -42,6 +46,8 @@ const DevicesPage = () => {
     DeviceModel: 'ZKTeco F22',
     IPAddress: '',
     PortNo: 4370,
+    Username: '',
+    Password: '',
   });
 
   const fetchDevices = async () => {
@@ -60,13 +66,57 @@ const DevicesPage = () => {
     fetchDevices();
   }, []);
 
-  const handleCreateDevice = async () => {
+  const handleOpenCreate = () => {
+    setEditingDevice(null);
+    setFormData({
+      DeviceName: '',
+      DeviceSerialNo: '',
+      DeviceModel: 'ZKTeco F22',
+      IPAddress: '',
+      PortNo: 4370,
+      Username: '',
+      Password: '',
+    });
+    setOpenModal(true);
+  };
+
+  const handleOpenEdit = (dev) => {
+    setEditingDevice(dev);
+    setFormData({
+      DeviceName: dev.DeviceName || '',
+      DeviceSerialNo: dev.DeviceSerialNo || '',
+      DeviceModel: dev.DeviceModel || 'ZKTeco F22',
+      IPAddress: dev.IPAddress || '',
+      PortNo: dev.PortNo || 4370,
+      Username: dev.Username || '',
+      Password: dev.Password || '',
+    });
+    setOpenModal(true);
+  };
+
+  const handleSaveDevice = async () => {
     try {
-      await api.post('/devices', formData);
+      if (editingDevice) {
+        await api.put(`/devices/${editingDevice.DeviceCode}`, formData);
+      } else {
+        await api.post('/devices', formData);
+      }
       setOpenModal(false);
       fetchDevices();
     } catch (err) {
-      alert(err.response?.data?.message || 'Create device failed');
+      alert(err.response?.data?.message || (editingDevice ? 'Update device failed' : 'Create device failed'));
+    }
+  };
+
+  const handleDeleteDevice = async (dev) => {
+    if (!window.confirm(`Are you sure you want to delete biometric reader terminal "${dev.DeviceName}"?`)) {
+      return;
+    }
+    try {
+      await api.delete(`/devices/${dev.DeviceCode}`);
+      fetchDevices();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Delete device failed');
     }
   };
 
@@ -120,7 +170,7 @@ const DevicesPage = () => {
               variant="contained"
               color="primary"
               startIcon={<AddIcon />}
-              onClick={() => setOpenModal(true)}
+              onClick={handleOpenCreate}
             >
               Register Biometric Reader
             </Button>
@@ -136,18 +186,42 @@ const DevicesPage = () => {
         <Grid container spacing={3}>
           {devices.map((dev) => (
             <Grid item xs={12} sm={6} md={4} key={dev.DeviceCode}>
-              <Card sx={{ height: '100%', position: 'relative' }}>
+              <Card sx={{ height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                     <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'rgba(6, 182, 212, 0.15)', color: 'info.main' }}>
                       <DeviceIcon />
                     </Box>
-                    <Chip
-                      label={dev.DeviceStatus}
-                      size="small"
-                      color={dev.DeviceStatus === 'ONLINE' ? 'success' : 'error'}
-                      sx={{ height: 20, fontSize: '0.7rem' }}
-                    />
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Chip
+                        label={dev.DeviceStatus}
+                        size="small"
+                        color={dev.DeviceStatus === 'ONLINE' ? 'success' : 'error'}
+                        sx={{ height: 20, fontSize: '0.7rem' }}
+                      />
+                      {canMutate('devices') && (
+                        <Box display="flex" gap={0.5}>
+                          <Tooltip title="Edit Device Details">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenEdit(dev)}
+                              sx={{ color: 'primary.light', p: 0.5, bgcolor: 'rgba(255,255,255,0.04)' }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete Biometric Device">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteDevice(dev)}
+                              sx={{ color: 'error.main', p: 0.5, bgcolor: 'rgba(255,255,255,0.04)' }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
 
                   <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', mb: 0.5 }}>
@@ -175,9 +249,11 @@ const DevicesPage = () => {
         </Grid>
       )}
 
-      {/* Register Device Modal */}
+      {/* Register / Edit Device Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Register New Biometric Reader</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          {editingDevice ? `Edit Biometric Reader (#${editingDevice.DeviceCode})` : 'Register New Biometric Reader'}
+        </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
           <TextField
             label="Device Terminal Name"
@@ -215,11 +291,28 @@ const DevicesPage = () => {
               onChange={(e) => setFormData({ ...formData, PortNo: Number(e.target.value) })}
             />
           </Box>
+          <Box display="flex" gap={2}>
+            <TextField
+              label="Device Username"
+              fullWidth
+              value={formData.Username}
+              onChange={(e) => setFormData({ ...formData, Username: e.target.value })}
+              placeholder="e.g. admin"
+            />
+            <TextField
+              label="Device Password"
+              type="password"
+              fullWidth
+              value={formData.Password}
+              onChange={(e) => setFormData({ ...formData, Password: e.target.value })}
+              placeholder="••••••••"
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setOpenModal(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateDevice}>
-            Save Device Terminal
+          <Button variant="contained" onClick={handleSaveDevice}>
+            {editingDevice ? 'Update Device Terminal' : 'Save Device Terminal'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useGuide } from '../contexts/GuideContext';
+import { useHealthSync } from '../contexts/HealthSyncContext';
 import {
   Box,
   Typography,
@@ -32,6 +33,7 @@ const AttendancePage = () => {
   const [empSearch, setEmpSearch] = useState('');
 
   const { guideMode } = useGuide();
+  const { syncSignal } = useHealthSync();
 
   const fetchAttendance = async () => {
     setLoading(true);
@@ -55,7 +57,7 @@ const AttendancePage = () => {
 
   useEffect(() => {
     fetchAttendance();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, syncSignal]);
 
   return (
     <Box>

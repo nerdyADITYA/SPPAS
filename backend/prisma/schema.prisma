@@ -415,6 +415,8 @@ model securitydevicemaster {
   DeviceModel       String?        @db.VarChar(100)
   IPAddress         String         @unique @db.VarChar(45)
   PortNo            Int            @default(4370) @db.UnsignedSmallInt
+  Username          String?        @db.VarChar(50)
+  Password          String?        @db.VarChar(100)
   CommunicationType CommunicationType? @default(TCPIP)
   LocationCode      Int?           @db.UnsignedSmallInt
   DeviceStatus      DeviceStatus?  @default(OFFLINE)

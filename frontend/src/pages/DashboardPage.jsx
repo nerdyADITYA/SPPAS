@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { getSocket } from '../services/socket';
 import { useGuide } from '../contexts/GuideContext';
+import { useHealthSync } from '../contexts/HealthSyncContext';
 import { useSnackbar } from 'notistack';
 
 import {
@@ -63,6 +64,7 @@ const DashboardPage = () => {
   // Live Socket.IO Activity Log Stream
   const [activityLogs, setActivityLogs] = useState([]);
   const { guideMode } = useGuide();
+  const { syncSignal } = useHealthSync();
   const { enqueueSnackbar } = useSnackbar();
 
   const addLog = (message, type = 'info') => {
@@ -116,7 +118,7 @@ const DashboardPage = () => {
       socket.off('AttendanceReceived');
       socket.off('AllocationCreated');
     };
-  }, []);
+  }, [syncSignal]);
 
   // 1. Simulate Guard Punch (Supports Batch / Multi-Select)
   const handleSimulatePunch = async (empNosOverride = null) => {

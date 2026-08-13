@@ -44,19 +44,19 @@
     },
     "attendance": {
       "enabled": true,
-      "accessLevel": "FULL_ACCESS"
+      "accessLevel": "VIEW_ONLY"
     },
     "deployment": {
       "enabled": true,
-      "accessLevel": "FULL_ACCESS"
+      "accessLevel": "VIEW_ONLY"
     },
     "posts": {
       "enabled": true,
-      "accessLevel": "FULL_ACCESS"
+      "accessLevel": "VIEW_ONLY"
     },
     "devices": {
       "enabled": true,
-      "accessLevel": "FULL_ACCESS"
+      "accessLevel": "VIEW_ONLY"
     },
     "alerts": {
       "enabled": true,

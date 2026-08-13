@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useGuide } from '../contexts/GuideContext';
 import { useAccessRights } from '../contexts/AccessRightsContext';
+import { useHealthSync } from '../contexts/HealthSyncContext';
 import {
   Box,
   Drawer,
@@ -61,6 +62,7 @@ const AppLayout = () => {
   const { user, logout } = useAuth();
   const { guideMode, toggleGuideMode } = useGuide();
   const { hasPageAccess } = useAccessRights();
+  const { syncData } = useHealthSync();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -196,6 +198,23 @@ const AppLayout = () => {
                     </Typography>
                   </Box>
                 }
+              />
+            </Tooltip>
+          </Box>
+          {/* Live System Health Badge */}
+          <Box sx={{ mr: 2, display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+            <Tooltip title="Live Background Biometric Sync & Auto-Allocation Engine Status">
+              <Chip
+                size="small"
+                label={`Live Sync: Auto Allocation Active (${syncData?.onlineDevicesCount || 0} Device Online)`}
+                sx={{
+                  bgcolor: 'rgba(16, 185, 129, 0.12)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  '& .MuiChip-label': { px: 1.2 },
+                }}
               />
             </Tooltip>
           </Box>

@@ -4,6 +4,8 @@ const createDeviceValidator = [
   body('DeviceName').trim().notEmpty().withMessage('Device name is required.'),
   body('IPAddress').isIP().withMessage('Valid IP address is required.'),
   body('PortNo').optional().isInt({ min: 1, max: 65535 }).withMessage('Port must be between 1 and 65535.'),
+  body('Username').optional().isString(),
+  body('Password').optional().isString(),
 ];
 
 module.exports = { createDeviceValidator };

@@ -22,4 +22,44 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/sync-status', async (req, res) => {
+  try {
+    const [latestAttendance, latestDeployment, onlineDevicesCount, totalDevicesCount, activeDeploymentsCount] = await Promise.all([
+      prisma.securityattendance.findFirst({
+        orderBy: { AttendanceCode: 'desc' },
+        select: { PunchDateTime: true, CreatedDateTime: true },
+      }),
+      prisma.securitydeployment.findFirst({
+        orderBy: { DeploymentCode: 'desc' },
+        select: { DeploymentDate: true, CreatedDateTime: true },
+      }),
+      prisma.securitydevicemaster.count({
+        where: { DeviceStatus: 'ONLINE', Enable: 'Y' },
+      }),
+      prisma.securitydevicemaster.count({
+        where: { Enable: 'Y' },
+      }),
+      prisma.securitydeployment.count({
+        where: { DeploymentStatus: { in: ['ALLOCATED', 'REPORTED'] } },
+      }),
+    ]);
+
+    const lastAttendanceTime = latestAttendance ? (latestAttendance.CreatedDateTime || latestAttendance.PunchDateTime) : null;
+    const lastDeploymentTime = latestDeployment ? (latestDeployment.CreatedDateTime || latestDeployment.DeploymentDate) : null;
+
+    return sendSuccess(res, 'System sync status retrieved', {
+      status: 'ONLINE',
+      database: 'CONNECTED',
+      serverTime: new Date().toISOString(),
+      lastAttendanceTime,
+      lastDeploymentTime,
+      onlineDevicesCount,
+      totalDevicesCount,
+      activeDeploymentsCount,
+    });
+  } catch (error) {
+    return sendError(res, 'Failed to fetch sync status', [error.message], 500);
+  }
+});
+
 module.exports = router;

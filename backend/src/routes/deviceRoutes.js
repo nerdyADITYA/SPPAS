@@ -6,6 +6,7 @@ const { validate } = require('../middleware/validationMiddleware');
 const { authenticate, authorize, checkModuleAccess } = require('../middleware/authMiddleware');
 const { ROLES } = require('../constants/roles');
 
+router.get('/active', deviceController.getDevices); // Active devices query for background python daemon
 router.get('/', authenticate, checkModuleAccess('devices', 'READ'), deviceController.getDevices);
 router.get('/:id', authenticate, checkModuleAccess('devices', 'READ'), deviceController.getDeviceById);
 router.post('/', authenticate, authorize([ROLES.SUPERADMIN, ROLES.ADMIN]), checkModuleAccess('devices', 'MUTATE'), createDeviceValidator, validate, deviceController.createDevice);

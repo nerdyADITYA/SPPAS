@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useGuide } from '../contexts/GuideContext';
+import { useHealthSync } from '../contexts/HealthSyncContext';
 import {
   Box,
   Typography,
@@ -37,6 +38,7 @@ const DeploymentPage = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const { guideMode } = useGuide();
+  const { syncSignal } = useHealthSync();
 
   const [formData, setFormData] = useState({
     deploymentDate: new Date().toISOString().split('T')[0],
@@ -71,7 +73,7 @@ const DeploymentPage = () => {
   useEffect(() => {
     fetchDeployments();
     fetchPosts();
-  }, [page]);
+  }, [page, syncSignal]);
 
   const handleManualAllocation = async () => {
     try {

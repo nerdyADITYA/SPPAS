@@ -1,62 +1,112 @@
 class SessionStore {
   constructor() {
-    // Map of empNo -> { sessionId, token, ipAddress, userAgent, loginTime, lastActive }
-    this.sessions = new Map();
+    // Map of empNo -> Map<sessionId, sessionData>
+    this.userSessions = new Map();
     this.SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes Inactivity Timeout
   }
 
   createSession(empNo, token, sessionId, ipAddress = '127.0.0.1', userAgent = 'Browser') {
+    const key = String(empNo);
+    if (!this.userSessions.has(key)) {
+      this.userSessions.set(key, new Map());
+    }
+
     const sessionData = {
       sessionId,
-      empNo: String(empNo),
+      empNo: key,
       token,
       ipAddress,
       userAgent,
       loginTime: new Date(),
       lastActive: new Date(),
     };
-    this.sessions.set(String(empNo), sessionData);
+
+    const userMap = this.userSessions.get(key);
+    userMap.set(sessionId, sessionData);
     return sessionData;
   }
 
   getActiveSession(empNo) {
-    const active = this.sessions.get(String(empNo));
-    if (!active) return null;
+    const key = String(empNo);
+    const userMap = this.userSessions.get(key);
+    if (!userMap || userMap.size === 0) return null;
 
-    // Check if session has expired due to 15 minutes of inactivity
     const now = new Date().getTime();
-    const lastActiveTime = new Date(active.lastActive).getTime();
-    if (now - lastActiveTime > this.SESSION_TIMEOUT_MS) {
-      this.sessions.delete(String(empNo));
-      return null;
+    let latestSession = null;
+
+    for (const [sessionId, session] of userMap.entries()) {
+      const lastActiveTime = new Date(session.lastActive).getTime();
+      if (now - lastActiveTime > this.SESSION_TIMEOUT_MS) {
+        userMap.delete(sessionId);
+      } else {
+        if (!latestSession || new Date(session.lastActive).getTime() > new Date(latestSession.lastActive).getTime()) {
+          latestSession = session;
+        }
+      }
     }
 
-    return active;
+    if (userMap.size === 0) {
+      this.userSessions.delete(key);
+    }
+
+    return latestSession;
   }
 
-  removeSession(empNo) {
-    return this.sessions.delete(String(empNo));
+  removeSession(empNo, sessionId = null) {
+    const key = String(empNo);
+    const userMap = this.userSessions.get(key);
+    if (!userMap) return false;
+
+    if (sessionId) {
+      userMap.delete(sessionId);
+      if (userMap.size === 0) this.userSessions.delete(key);
+      return true;
+    } else {
+      return this.userSessions.delete(key);
+    }
   }
 
   hasSession(empNo) {
-    return this.sessions.has(String(empNo));
+    const key = String(empNo);
+    const userMap = this.userSessions.get(key);
+    return Boolean(userMap && userMap.size > 0);
   }
 
   isSessionValid(empNo, sessionId) {
-    const active = this.getActiveSession(empNo);
-    if (!active) return false;
-    return active.sessionId === sessionId;
+    const key = String(empNo);
+    const userMap = this.userSessions.get(key);
+    if (!userMap) return false;
+
+    const session = userMap.get(sessionId);
+    if (!session) return false;
+
+    const now = new Date().getTime();
+    const lastActiveTime = new Date(session.lastActive).getTime();
+    if (now - lastActiveTime > this.SESSION_TIMEOUT_MS) {
+      userMap.delete(sessionId);
+      if (userMap.size === 0) this.userSessions.delete(key);
+      return false;
+    }
+
+    return true;
   }
 
-  updateActivity(empNo) {
-    const active = this.sessions.get(String(empNo));
-    if (active) {
-      active.lastActive = new Date();
+  updateActivity(empNo, sessionId = null) {
+    const key = String(empNo);
+    const userMap = this.userSessions.get(key);
+    if (!userMap) return;
+
+    if (sessionId && userMap.has(sessionId)) {
+      userMap.get(sessionId).lastActive = new Date();
+    } else {
+      for (const session of userMap.values()) {
+        session.lastActive = new Date();
+      }
     }
   }
 
   clearAll() {
-    this.sessions.clear();
+    this.userSessions.clear();
   }
 }
 

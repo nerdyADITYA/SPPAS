@@ -7,7 +7,7 @@ from logger import logger
 def start_scheduler():
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        device_manager.sync_all_devices,
+        device_manager.sync_online_devices,
         "interval",
         seconds=SYNC_INTERVAL,
         id="device_sync_job"
