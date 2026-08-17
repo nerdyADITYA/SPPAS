@@ -4,19 +4,19 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#3b82f6', // Electric Blue
-      light: '#60a5fa',
-      dark: '#2563eb',
-      contrastText: '#ffffff',
+      main: '#F35B25', // Vibrant Orange
+      light: '#ff8d58',
+      dark: '#b83400',
+      contrastText: '#FDFCFC',
     },
     secondary: {
-      main: '#10b981', // Emerald Green
-      light: '#34d399',
-      dark: '#059669',
+      main: '#2A3356', // Deep Navy Blue
+      light: '#585f83',
+      dark: '#000b2d',
     },
     background: {
-      default: '#0b0f19',
-      paper: '#111827',
+      default: '#101424', // Deep Space Dark Navy
+      paper: '#2A3356',   // Deep Navy Blue base
     },
     error: {
       main: '#ef4444',
@@ -31,8 +31,8 @@ const theme = createTheme({
       main: '#10b981',
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#94a3b8',
+      primary: '#FDFCFC', // Clean Off-White
+      secondary: '#E8E2E2', // Soft Slate Gray
     },
   },
   typography: {
@@ -54,7 +54,7 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
@@ -64,7 +64,7 @@ const theme = createTheme({
           padding: '8px 18px',
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+            boxShadow: '0 4px 14px rgba(243, 91, 37, 0.4)',
           },
         },
       },
@@ -73,9 +73,17 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: '#111827',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: 12,
+          backgroundColor: 'rgba(42, 51, 86, 0.45)', // Glassmorphic translucent Navy
+          backdropFilter: 'blur(12px) saturate(180%)',
+          border: '1px solid rgba(243, 91, 37, 0.15)', // Light orange border
+          borderRadius: 14,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            borderColor: 'rgba(243, 91, 37, 0.45)',
+            boxShadow: '0 12px 40px 0 rgba(243, 91, 37, 0.25)',
+          },
         },
       },
     },
