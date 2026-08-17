@@ -14,6 +14,15 @@ class ShiftService {
     }
     return shift;
   }
+
+  async createShift(data) {
+    return await shiftRepository.create(data);
+  }
+
+  async updateShift(shiftCode, data) {
+    await this.getShiftById(shiftCode);
+    return await shiftRepository.update(shiftCode, data);
+  }
 }
 
 module.exports = new ShiftService();
