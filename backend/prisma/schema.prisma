@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 // ----------------------------------------------------------------------------
@@ -505,7 +506,7 @@ model securitydeploymenthistory {
 
 model securityalertlog {
   AlertCode        BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
-  AlertDateTime    DateTime      @default(now()) @db.DateTime
+  AlertDateTime    DateTime      @default(now()) @db.DateTime(0)
   AlertType        AlertType
   Severity         Severity?     @default(MEDIUM)
   DeploymentCode   BigInt?       @db.UnsignedBigInt
@@ -536,7 +537,7 @@ model securitypostvacancy {
   PresentGuards   Int           @default(0) @db.UnsignedSmallInt
   VacantGuards    Int           @default(0) @db.UnsignedSmallInt
   Status          VacancyStatus? @default(VACANT)
-  LastUpdated     DateTime      @default(now()) @updatedAt @db.DateTime
+  LastUpdated     DateTime      @default(now()) @updatedAt @db.DateTime(0)
   CreatedDateTime DateTime      @default(now()) @db.Timestamp(0)
 
   post            securitypostmaster @relation(fields: [PostCode], references: [PostCode])

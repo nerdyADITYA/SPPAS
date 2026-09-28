@@ -248,9 +248,10 @@ async function seedMediumDataset() {
   });
 
   const guards = employeesList.filter((e) => e.role === 'USER');
+  // Seed punches for 30 guards so 16 guards remain unpunched for manual dropdown simulation
+  const punchCount = Math.min(30, guards.length);
   let deviceIdx = 1;
-
-  for (let idx = 0; idx < guards.length; idx++) {
+  for (let idx = 0; idx < punchCount; idx++) {
     const guard = guards[idx];
     const totalMinutes = 5 * 60 + 45 + (idx % 30);
     const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
@@ -284,7 +285,7 @@ async function seedMediumDataset() {
   console.log(`- Security Duty Posts: 15`);
   console.log(`- Biometric Devices: 8`);
   console.log(`- Total Employees: ${employeesList.length}`);
-  console.log(`- Pending Biometric Punches Today: ${guards.length}`);
+  console.log(`- Pending Biometric Punches Today: ${punchCount}`);
   console.log('=======================================================');
 }
 

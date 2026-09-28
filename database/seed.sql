@@ -93,14 +93,14 @@ ON DUPLICATE KEY UPDATE `PostName` = VALUES(`PostName`), `Priority` = VALUES(`Pr
 INSERT INTO `securitydevicemaster` 
 (`DeviceCode`, `DeviceName`, `DeviceSerialNo`, `DeviceModel`, `IPAddress`, `PortNo`, `CommunicationType`, `LocationCode`, `DeviceStatus`, `Enable`)
 VALUES
-  (1, 'North Gate Main Reader A', 'ZK-NG-001', 'ZKTeco F22', '192.168.1.101', 4370, 'TCPIP', 1, 'ONLINE', 'Y'),
-  (2, 'North Gate Turnstile Reader B', 'ZK-NG-002', 'ZKTeco F22', '192.168.1.102', 4370, 'TCPIP', 1, 'ONLINE', 'Y'),
-  (3, 'South Cargo Gate Reader 1', 'ZK-SC-003', 'ZKTeco SpeedFace', '192.168.1.103', 4370, 'TCPIP', 2, 'ONLINE', 'Y'),
-  (4, 'South Weighbridge Reader 2', 'ZK-SC-004', 'ZKTeco SpeedFace', '192.168.1.104', 4370, 'TCPIP', 2, 'ONLINE', 'Y'),
-  (5, 'Data Center Access Terminal', 'ZK-DC-005', 'ZKTeco SilkFP', '192.168.1.105', 4370, 'TCPIP', 3, 'ONLINE', 'Y'),
-  (6, 'Admin Lobby Main Terminal', 'ZK-AT-006', 'ZKTeco SilkFP', '192.168.1.106', 4370, 'TCPIP', 4, 'ONLINE', 'Y'),
-  (7, 'Perimeter Patrol Station 1', 'ZK-PZ-007', 'ZKTeco F18', '192.168.1.107', 4370, 'TCPIP', 5, 'ONLINE', 'Y'),
-  (8, 'Perimeter Patrol Station 2', 'ZK-PZ-008', 'ZKTeco F18', '192.168.1.108', 4370, 'TCPIP', 5, 'OFFLINE', 'Y')
+  (1, 'North Gate Main Reader A', 'ZK-NG-001', 'ZKTeco F22', '192.168.1.101', 4370, 'TCP/IP', 1, 'ONLINE', 'Y'),
+  (2, 'North Gate Turnstile Reader B', 'ZK-NG-002', 'ZKTeco F22', '192.168.1.102', 4370, 'TCP/IP', 1, 'ONLINE', 'Y'),
+  (3, 'South Cargo Gate Reader 1', 'ZK-SC-003', 'ZKTeco SpeedFace', '192.168.1.103', 4370, 'TCP/IP', 2, 'ONLINE', 'Y'),
+  (4, 'South Weighbridge Reader 2', 'ZK-SC-004', 'ZKTeco SpeedFace', '192.168.1.104', 4370, 'TCP/IP', 2, 'ONLINE', 'Y'),
+  (5, 'Data Center Access Terminal', 'ZK-DC-005', 'ZKTeco SilkFP', '192.168.1.105', 4370, 'TCP/IP', 3, 'ONLINE', 'Y'),
+  (6, 'Admin Lobby Main Terminal', 'ZK-AT-006', 'ZKTeco SilkFP', '192.168.1.106', 4370, 'TCP/IP', 4, 'ONLINE', 'Y'),
+  (7, 'Perimeter Patrol Station 1', 'ZK-PZ-007', 'ZKTeco F18', '192.168.1.107', 4370, 'TCP/IP', 5, 'ONLINE', 'Y'),
+  (8, 'Perimeter Patrol Station 2', 'ZK-PZ-008', 'ZKTeco F18', '192.168.1.108', 4370, 'TCP/IP', 5, 'OFFLINE', 'Y')
 ON DUPLICATE KEY UPDATE `DeviceName` = VALUES(`DeviceName`);
 
 -- 10. Insert Default Allocation Rule
