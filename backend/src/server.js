@@ -17,7 +17,11 @@ server.listen(config.port, () => {
   logger.info(`=======================================================`);
   logger.info(`SPPAS Backend Service running on port: ${config.port}`);
   logger.info(`Environment: ${config.nodeEnv}`);
-  logger.info(`API Base URL: http://localhost:${config.port}/api/v1`);
+  if (config.nodeEnv === 'production') {
+    logger.info(`API Base URL: /api/v1 (Public Cloud Domain)`);
+  } else {
+    logger.info(`API Base URL: http://localhost:${config.port}/api/v1`);
+  }
   logger.info(`=======================================================`);
 });
 

@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Read VITE_API_URL if configured (e.g. https://sppas-backend.onrender.com), fallback to relative path for local Vite proxy
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: `${API_BASE}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
